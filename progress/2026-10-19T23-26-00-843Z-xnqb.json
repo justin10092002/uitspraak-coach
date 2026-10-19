@@ -1,0 +1,94 @@
+{
+ "device": "MacIntel",
+ "records": [
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Ik zie je niet. Waar sta je?",
+   "reason": "noscore",
+   "heard": "Ik zie je niet. Waar sta je?",
+   "gain": 2.5,
+   "id": "mvfvs8gyqjdy",
+   "at": "2026-10-19T23:24:00.610Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "",
+   "sentence": "Ik zie je niet. Waar sta je?",
+   "score": 100,
+   "missed": [],
+   "heard": "Ik zie je niet. Waar sta je?",
+   "id": "mvfvs8gzweww",
+   "at": "2026-10-19T23:24:00.611Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Ik zie je niet. Waar sta je?",
+   "heardAudio": true,
+   "verdict": "Sehr verständlich, aber bei einem Wort ist dir ein deutscher Laut reingerutscht!",
+   "words": [
+    "waar: Klang wie das deutsche 'was' mit s am Ende.",
+    "ik: Das k war kaum hörbar."
+   ],
+   "id": "mvfvsf5bbtx5",
+   "at": "2026-10-19T23:24:09.263Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "",
+   "sentence": "Ik zie je niet. Waar sta je?",
+   "score": 63,
+   "acc": 53,
+   "flu": 100,
+   "weak": [
+    "Waar:fehlt",
+    "sta:fehlt",
+    "je:fehlt"
+   ],
+   "id": "mvfvsj54jtfq",
+   "at": "2026-10-19T23:24:14.440Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Ik zie je niet. Waar sta je?",
+   "heardAudio": true,
+   "verdict": "Der erste Teil war schon richtig gut, aber die zweite Hälfte hat komplett gefehlt!",
+   "words": [
+    "Waar sta je?: Wurde gar nicht gesprochen."
+   ],
+   "id": "mvfvsn5oy54v",
+   "at": "2026-10-19T23:24:19.644Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Ik sta bij de grote vlag.",
+   "reason": "noscore",
+   "heard": "Ik sta bij de grote vlag.",
+   "gain": 2.5,
+   "id": "mvfvtutyh92i",
+   "at": "2026-10-19T23:25:16.246Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Ik sta bij de grote vlag.",
+   "score": 100,
+   "missed": [],
+   "heard": "Ik sta bij de grote vlag.",
+   "id": "mvfvtuu13x0w",
+   "at": "2026-10-19T23:25:16.249Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Ik sta bij de grote vlag.",
+   "heardAudio": true,
+   "verdict": "Sehr verständlich, besonders dein 'sta' war frei vom deutschen 'sch'!",
+   "words": [
+    "vlag: v wie deutsches f gesprochen, a zu hell"
+   ],
+   "id": "mvfvu1wb7nbd",
+   "at": "2026-10-19T23:25:25.404Z"
+  }
+ ]
+}
