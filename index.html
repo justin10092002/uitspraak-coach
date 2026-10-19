@@ -542,9 +542,10 @@ function recognizeAzure(reference,onListening,onUrl){
     try{
       const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
       sc.speechRecognitionLanguage='nl-NL';
-      sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,'10000');
-      sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,reference?'2500':'2000');
-      sc.setProperty(SpeechSDK.PropertyId.Speech_SegmentationSilenceTimeoutMs,reference?'2000':'1500');
+      if(!store.get('plainTimeouts',false)){
+        sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,'8000');
+        sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,'2000');
+      }
       let ac;
       if(mic._release){ // our processed stream: push PCM ourselves
         pushStream=SpeechSDK.AudioInputStream.createPushStream(SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000,16,1));
@@ -562,6 +563,7 @@ function recognizeAzure(reference,onListening,onUrl){
       try{
         if(r.reason===SpeechSDK.ResultReason.Canceled){
           const d=SpeechSDK.CancellationDetails.fromResult(r);
+          if(/1007|speech context/i.test(d.errorDetails)&&!store.get('plainTimeouts',false)){store.set('plainTimeouts',true);reject({msg:'Bitte nochmal sprechen.',sub:'Ich habe eine Einstellung angepasst, beim nächsten Versuch sollte es klappen.',code:'1007-fallback'});return}
           if(!reference&&usePA&&!/401|1006|auth|subscription|key/i.test(d.errorDetails)){unscriptedOK=false;store.set('unscriptedOK',false);reject({msg:'Bitte nochmal sprechen.',sub:'Ich habe die freie Aussprache-Bewertung abgeschaltet, sie wird hier nicht unterstützt.'});return}
           reject({msg:'Das hat nicht geklappt.',sub:/401|1006|auth/i.test(d.errorDetails)?'Azure-Schlüssel oder Region stimmt nicht. Prüfe die Einstellungen.':d.errorDetails});return;
         }
@@ -629,7 +631,7 @@ async function llm(system,messages,maxTokens,audio){
 /* ================= sync with GitHub ================= */
 const GH={owner:'justin10092002',repo:'uitspraak-coach',branch:'progress'};
 function pending(){return store.get('pending',[])}
-function record(r){const p=pending();p.push({...r,at:new Date().toISOString()});store.set('pending',p.slice(-300));updateSync()}
+function record(r){const p=pending();p.push({...r,id:Date.now().toString(36)+Math.random().toString(36).slice(2,6),at:new Date().toISOString()});store.set('pending',p.slice(-300));updateSync()}
 let flushing=false;
 function updateSync(msg){
   const n=pending().length;
@@ -640,6 +642,8 @@ async function flush(){
   if(flushing||!cfg.ghtoken) return;
   const items=pending();if(!items.length){updateSync();return}
   flushing=true;updateSync('Synchronisiere…');
+  store.set('pending',[]); // take them out now so a suspended app can't send them twice
+  const restore=()=>{const ids=new Set(pending().map(x=>x.id));store.set('pending',[...items.filter(x=>!ids.has(x.id)),...pending()])};
   const stamp=new Date().toISOString().replace(/[:.]/g,'-');
   const path='progress/'+stamp+'-'+Math.random().toString(36).slice(2,6)+'.json';
   const body={device:IOS?'iPhone':(navigator.platform||'web'),records:items};
@@ -647,9 +651,9 @@ async function flush(){
     const res=await fetch(`https://api.github.com/repos/${GH.owner}/${GH.repo}/contents/${path}`,{method:'PUT',keepalive:JSON.stringify(body).length<60000,
       headers:{'Authorization':'Bearer '+cfg.ghtoken,'Accept':'application/vnd.github+json','Content-Type':'application/json'},
       body:JSON.stringify({message:'Fortschritt '+stamp.slice(0,16),content:b64(JSON.stringify(body,null,1)),branch:GH.branch})});
-    if(res.ok){store.set('pending',pending().slice(items.length));store.set('lastSync',new Date().toISOString());updateSync()}
-    else updateSync(res.status===401?'Token ungültig oder abgelaufen.':res.status===403||res.status===404?'Token hat keinen Schreibzugriff auf uitspraak-coach.':'Sync-Fehler '+res.status+'. Versuche es später.');
-  }catch(e){updateSync('Offline. Wird später synchronisiert.')}
+    if(res.ok){store.set('lastSync',new Date().toISOString());updateSync()}
+    else{restore();updateSync(res.status===401?'Token ungültig oder abgelaufen.':res.status===403||res.status===404?'Token hat keinen Schreibzugriff auf uitspraak-coach.':'Sync-Fehler '+res.status+'. Versuche es später.')}
+  }catch(e){restore();updateSync('Offline. Wird später synchronisiert.')}
   finally{flushing=false}
 }
 $('syncNow').onclick=()=>{cfg.ghtoken=$('ghtoken').value.trim();store.set('ghToken',cfg.ghtoken);flush()};
