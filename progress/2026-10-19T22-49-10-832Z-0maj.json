@@ -1,0 +1,15 @@
+{
+ "device": "iPhone",
+ "records": [
+  {
+   "type": "pron",
+   "lesson": "",
+   "sentence": "Ik zie je niet. Waar sta je?",
+   "score": 98,
+   "acc": 97,
+   "flu": 99,
+   "weak": [],
+   "at": "2026-10-19T22:45:02.325Z"
+  }
+ ]
+}
