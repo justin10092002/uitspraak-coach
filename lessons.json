@@ -1,0 +1,653 @@
+{
+ "updated": "2026-10-19",
+ "packs": [
+  {
+   "id": "les6",
+   "title": "Les 6 · Afspreken & de weg vragen (12.10.)",
+   "items": [
+    [
+     "Ik zie je niet. Waar sta je?",
+     "Ich seh dich nicht. Wo stehst du?",
+     "sta je – ohne -t, wenn je dahinter steht · Frage am Ende mit der Stimme hoch",
+     "WAAR  STA"
+    ],
+    [
+     "Ik sta bij de grote vlag.",
+     "Ich stehe bei der großen Flagge.",
+     "vl = „fl“, das v ist fast ein f",
+     "GRO·te  VLAG"
+    ],
+    [
+     "Waar zijn de toiletten?",
+     "Wo sind die Toiletten?",
+     "oi = „oi“ wie in „Boiler“",
+     "toi·LET·ten"
+    ],
+    [
+     "Is het ver hiervandaan?",
+     "Ist es weit von hier?",
+     "Betonung ganz hinten",
+     "hier·van·DAAN"
+    ],
+    [
+     "Rechtdoor, en dan links.",
+     "Geradeaus, und dann links.",
+     "rechtdoor: ch kratzig, Betonung auf door",
+     "recht·DOOR  LINKS"
+    ],
+    [
+     "Bij het tweede podium rechtsaf.",
+     "An der zweiten Bühne rechts ab.",
+     "bij = an/bei · rechtsaf: Betonung auf af",
+     "TWEE·de  PO·di·um  rechts·AF"
+    ],
+    [
+     "Hoe laat is het? Het is half tien.",
+     "Wie spät ist es? Es ist halb zehn.",
+     "half tien = 9:30, wie im Deutschen",
+     "LAAT  HALF  TIEN"
+    ],
+    [
+     "Zullen we om elf uur afspreken?",
+     "Treffen wir uns um elf?",
+     "trennbare Verben: der vordere Teil wird betont",
+     "ELF  UUR  AF·spre·ken"
+    ],
+    [
+     "Ik ben er over vijf minuten.",
+     "Ich bin in fünf Minuten da.",
+     "over = in (zeitlich) · er = da",
+     "VIJF  mi·NU·ten"
+    ],
+    [
+     "Mijn telefoon is bijna leeg.",
+     "Mein Handy ist fast leer.",
+     "leeg = leer (Akku)",
+     "te·le·FOON  BIJ·na  LEEG"
+    ],
+    [
+     "Stuur me even een appje!",
+     "Schick mir mal kurz eine Nachricht!",
+     "appje = WhatsApp-Nachricht · stuur: uu = „ü“",
+     "STUUR  APP·je"
+    ],
+    [
+     "Sorry, ik ben te laat! Geeft niet!",
+     "Sorry, ich bin zu spät! Macht nichts!",
+     "geeft niet = macht nichts",
+     "te  LAAT  GEEFT  NIET"
+    ]
+   ],
+   "scene": {
+    "name": "Sanne suchen",
+    "who": "Sanne",
+    "role": "You are Sanne (from Utrecht), whom Justin met earlier at the mainstage. You agreed to meet at the entrance, but you can't find each other. You are texting/calling. Your phone battery is almost empty. Make him describe where he is, ask the way, agree on a meeting point and a time.",
+    "goal": "Sag, wo du stehst, frag nach dem Weg und macht Ort und Uhrzeit aus.",
+    "open": [
+     "Hé Justin! Ik sta bij de ingang, maar ik zie je niet. Waar sta jij?",
+     "Hey Justin! Ich stehe am Eingang, aber ich sehe dich nicht. Wo stehst du?"
+    ],
+    "hint": "Beschreib, wo du bist: „Ik sta bij …“ (de grote vlag, het tweede podium, de bar)."
+   }
+  },
+  {
+   "id": "les5",
+   "title": "Les 5 · Leute kennenlernen (12.10.)",
+   "items": [
+    [
+     "Hoi Sanne, ik ben Justin. Waar kom jij vandaan?",
+     "Hi Sanne, ich bin Justin. Wo kommst du her?",
+     "jij betont, wenn du die Frage zurückgibst",
+     "JIJ  van·DAAN"
+    ],
+    [
+     "Leuk je te ontmoeten!",
+     "Schön, dich kennenzulernen!",
+     "eu in „leuk“ = „ö“ · oe = „u“",
+     "LEUK  ont·MOE·ten"
+    ],
+    [
+     "Ik kom uit een klein dorp bij Karlsruhe.",
+     "Ich komme aus einem kleinen Dorf bei Karlsruhe.",
+     "een (ein) ≠ en (und) · bij = in der Nähe von",
+     "KLEIN  DORP"
+    ],
+    [
+     "Ik hou van hardstyle, maar ook uptempo.",
+     "Ich liebe Hardstyle, aber auch Uptempo.",
+     "ou in „hou“ = „au“ · van nie vergessen",
+     "HOU"
+    ],
+    [
+     "Wat vind je van de set van Lekkerfaces?",
+     "Was hältst du vom Set von Lekkerfaces?",
+     "vind je – ohne -t, wenn je dahinter steht",
+     "VIND  SET"
+    ],
+    [
+     "Ik vind het vet! Ik vind het saai.",
+     "Ich find's geil! Ich find's langweilig.",
+     "aai = langes „a“ + „i“",
+     "VET  SAAI"
+    ],
+    [
+     "Hoe oud ben je?",
+     "Wie alt bist du?",
+     "ou in „oud“ = „au“",
+     "OUD"
+    ],
+    [
+     "Wat voor werk doe je?",
+     "Was machst du beruflich?",
+     "w zwischen „w“ und „u“, Lippen locker",
+     "WERK"
+    ],
+    [
+     "Ben je hier alleen? Nee, met vrienden.",
+     "Bist du allein hier? Nein, mit Freunden.",
+     "",
+     "al·LEEN  VRIEN·den"
+    ],
+    [
+     "Is dit je eerste keer?",
+     "Ist das dein erstes Mal?",
+     "ee = langes „e“",
+     "EER·ste  KEER"
+    ],
+    [
+     "Wie is je favoriete DJ?",
+     "Wer ist dein Lieblings-DJ?",
+     "wie = wer (nicht „wie“!)",
+     "fa·vo·RIE·te"
+    ],
+    [
+     "Ik ook! Ik niet.",
+     "Ich auch! Ich nicht.",
+     "",
+     "OOK  NIET"
+    ],
+    [
+     "Oh, dat is niet fijn. Balen!",
+     "Oh, das ist nicht schön. Mist!",
+     "dat = bezieht sich auf das Gesagte",
+     "FIJN  BA·len"
+    ],
+    [
+     "Heerlijk! Dat klinkt goed.",
+     "Herrlich! Das klingt gut.",
+     "heerlijk: zwei e, ein r · klinkt mit k",
+     "HEER·lijk  KLINKT"
+    ],
+    [
+     "Zie ik je straks bij de ingang?",
+     "Seh ich dich später am Eingang?",
+     "z = weiches, stimmhaftes s",
+     "STRAKS  IN·gang"
+    ],
+    [
+     "Na het festival gaan we naar Amsterdam.",
+     "Nach dem Festival fahren wir nach Amsterdam.",
+     "na = zeitlich · naar = Richtung · gaan we",
+     "am·ster·DAM"
+    ]
+   ],
+   "scene": {
+    "name": "Mainstage",
+    "who": "Sanne",
+    "role": "You are Sanne from Utrecht, a friendly festival visitor standing next to Justin at the mainstage between two sets. Small talk: names, where from, music taste (hardstyle, uptempo), first time here, friends.",
+    "goal": "Stell dich vor, frag zurück und sag, welche Musik du magst (Ik hou van …, Wat vind je van …?).",
+    "open": [
+     "Hé! Wat een drukte, hè? Ik ben Sanne. Hoe heet jij?",
+     "Hey! Was für ein Gedränge, oder? Ich bin Sanne. Wie heißt du?"
+    ],
+    "hint": "„Hoi Sanne, ik ben … Waar kom jij vandaan?“"
+   }
+  },
+  {
+   "id": "les4",
+   "title": "Les 4 · Eten & drinken (09.10.)",
+   "items": [
+    [
+     "Ik heb honger en dorst.",
+     "Ich habe Hunger und Durst.",
+     "en (und) kurz · een (ein) lang",
+     "HON·ger  DORST"
+    ],
+    [
+     "Ik heb zin in een patatje oorlog.",
+     "Ich habe Lust auf Pommes mit Mayo, Erdnusssauce und Zwiebeln.",
+     "oo = langes „o“",
+     "pa·TAT·je  OOR·log"
+    ],
+    [
+     "Een grote friet met currysaus, graag.",
+     "Eine große Pommes mit Currysoße, bitte.",
+     "graag: zweimal kratziges „ch“",
+     "GRO·te  FRIET  GRAAG"
+    ],
+    [
+     "Doe maar een grote.",
+     "Mach mal eine große.",
+     "oe = „u“",
+     "GRO·te"
+    ],
+    [
+     "Wat kost dat?",
+     "Was kostet das?",
+     "",
+     "KOST"
+    ],
+    [
+     "Kan ik pinnen?",
+     "Kann ich mit Karte zahlen?",
+     "",
+     "PIN·nen"
+    ],
+    [
+     "Komt eraan! Eet smakelijk!",
+     "Kommt sofort! Guten Appetit!",
+     "ij in „smakelijk“ = schwaches „ə“",
+     "er·AAN  SMA·ke·lijk"
+    ],
+    [
+     "Geen bonnetje, dank je.",
+     "Keinen Kassenbon, danke.",
+     "tj in „bonnetje“ ≈ „tch“",
+     "BON·ne·tje"
+    ],
+    [
+     "Dit is mijn eerste keer op dit festival.",
+     "Das ist mein erstes Mal auf diesem Festival.",
+     "mijn (mein) ≠ mij (mich)",
+     "EER·ste  KEER"
+    ],
+    [
+     "Het is super gezellig!",
+     "Es ist super schön hier!",
+     "",
+     "ge·ZEL·lig"
+    ],
+    [
+     "Gisteren hebben we na de reis de tent opgezet.",
+     "Gestern haben wir nach der Reise das Zelt aufgebaut.",
+     "na = zeitlich · trennbar: op-ge-zet",
+     "GIS·te·ren  OP·ge·zet"
+    ],
+    [
+     "Gisteren hebben we de polsbandjes opgehaald.",
+     "Gestern haben wir die Bändchen abgeholt.",
+     "Mehrzahl immer de",
+     "POLS·band·jes  OP·ge·haald"
+    ],
+    [
+     "Vanochtend zijn we met de trein aangekomen.",
+     "Heute Morgen sind wir mit dem Zug angekommen.",
+     "ch in „vanochtend“ = „ch“ wie in „ach“",
+     "van·OCH·tend  AAN·ge·ko·men"
+    ]
+   ],
+   "scene": {
+    "name": "Frietkraam",
+    "who": "Verkoper",
+    "role": "You work at a fries stand (frietkraam) at a Dutch festival. Take his order (patatje mét, oorlog, currysaus, frikandel, drinks), say the price in euros, ask pin or contant, offer the receipt.",
+    "goal": "Bestell Essen und ein Getränk, frag nach dem Preis und bezahl mit Karte.",
+    "open": [
+     "Hoi! Wat mag het zijn?",
+     "Hi! Was darf's sein?"
+    ],
+    "hint": "„Een grote friet met …, graag.“"
+   }
+  },
+  {
+   "id": "les3",
+   "title": "Les 3 · Anreise & Camping (07.10.)",
+   "items": [
+    [
+     "Een biertje en een water, graag.",
+     "Ein Bier und ein Wasser, bitte.",
+     "en (und) vs. een (ein) – een mit langem „e“",
+     "BIER·tje  GRAAG"
+    ],
+    [
+     "Morgen gaan we met de trein naar het festival.",
+     "Morgen fahren wir mit dem Zug zum Festival.",
+     "ei in „trein“ ≈ „äi“",
+     "MOR·gen  TREIN"
+    ],
+    [
+     "Waar is de ingang?",
+     "Wo ist der Eingang?",
+     "de ingang – nicht het!",
+     "IN·gang"
+    ],
+    [
+     "Kun je me even helpen met mijn tent?",
+     "Kannst du mir mal kurz mit meinem Zelt helfen?",
+     "ij in „mijn“ = „äi“",
+     "HEL·pen  TENT"
+    ],
+    [
+     "Na de set gaan we naar de tent.",
+     "Nach dem Set gehen wir zum Zelt.",
+     "na = zeitlich · naar = Richtung",
+     "SET  TENT"
+    ],
+    [
+     "Heb je een haring over?",
+     "Hast du einen Hering übrig?",
+     "heb je – ohne -t, wenn je hinter dem Verb steht",
+     "HA·ring  O·ver"
+    ],
+    [
+     "Ik pak even mijn zaklamp.",
+     "Ich hol mal kurz meine Taschenlampe.",
+     "z = weiches, stimmhaftes s",
+     "ZAK·lamp"
+    ],
+    [
+     "Het regent.",
+     "Es regnet.",
+     "g = „ch“",
+     "RE·gent"
+    ],
+    [
+     "Om tien uur vertrekt de pendelbus.",
+     "Um zehn Uhr fährt der Shuttlebus ab.",
+     "uur = langes „ü“",
+     "ver·TREKT  PEN·del·bus"
+    ],
+    [
+     "Heb je je polsbandje al?",
+     "Hast du dein Bändchen schon?",
+     "tj in „bandje“ ≈ „tch“",
+     "POLS·band·je"
+    ],
+    [
+     "Je kunt je polsbandje bij de ingang ophalen.",
+     "Du kannst dein Bändchen am Eingang abholen.",
+     "trennbar: Betonung auf op",
+     "OP·ha·len"
+    ],
+    [
+     "Hoe heet je? Ik heet Justin, en jij?",
+     "Wie heißt du? Ich heiße Justin, und du?",
+     "",
+     "HEET  JIJ"
+    ],
+    [
+     "Dank je wel! Tot morgen!",
+     "Danke schön! Bis morgen!",
+     "",
+     "WEL  MOR·gen"
+    ]
+   ],
+   "scene": {
+    "name": "Campingnachbar",
+    "who": "Daan",
+    "role": "You are Daan, Justin's tent neighbour on the festival campsite. It just started raining. Ask when they arrived, how the trip was, offer help with the tent, ask if he has a spare tent peg (haring) or flashlight.",
+    "goal": "Erzähl, wie die Anreise war (Perfekt!), und frag nach Hilfe oder etwas, das dir fehlt.",
+    "open": [
+     "Hoi buurman! Zijn jullie net aangekomen?",
+     "Hi Nachbar! Seid ihr gerade angekommen?"
+    ],
+    "hint": "„Ja, we zijn vanochtend met de trein aangekomen.“"
+   }
+  },
+  {
+   "id": "les2",
+   "title": "Les 2 · Festival (30.09.)",
+   "items": [
+    [
+     "Gezellig!",
+     "gemütlich, schön, gesellig",
+     "g = „ch“ wie in „ach“ – zweimal",
+     "ge·ZEL·lig"
+    ],
+    [
+     "het feest · feesten",
+     "die Party · feiern",
+     "",
+     "FEEST  FEES·ten"
+    ],
+    [
+     "het podium",
+     "die Bühne",
+     "",
+     "PO·di·um"
+    ],
+    [
+     "de muntjes",
+     "die Getränkemarken",
+     "unt ≈ „ünt“",
+     "MUNT·jes"
+    ],
+    [
+     "Waar kom je vandaan?",
+     "Wo kommst du her?",
+     "",
+     "van·DAAN"
+    ],
+    [
+     "Ik kom uit Duitsland.",
+     "Ich komme aus Deutschland.",
+     "ui = „öi“, Mund rund – Schlüssellaut!",
+     "DUITS·land"
+    ],
+    [
+     "Nee, ik kom uit Duitsland.",
+     "Nein, ich komme aus Deutschland.",
+     "ee = langes „e“",
+     "NEE  DUITS·land"
+    ],
+    [
+     "Hoe is de set? Is ie vet?",
+     "Wie ist das Set? Ist es geil?",
+     "",
+     "SET  VET"
+    ],
+    [
+     "Tot straks!",
+     "Bis gleich!",
+     "",
+     "STRAKS"
+    ],
+    [
+     "Wat een vette set!",
+     "Was für ein geiles Set!",
+     "",
+     "VET·te  SET"
+    ],
+    [
+     "Zullen we een biertje halen?",
+     "Holen wir uns ein Bier?",
+     "",
+     "BIER·tje  HA·len"
+    ],
+    [
+     "Zullen we naar het podium gaan?",
+     "Wollen wir zur Bühne gehen?",
+     "",
+     "PO·di·um"
+    ],
+    [
+     "Wat mag het zijn?",
+     "Was darf's sein?",
+     "",
+     "ZIJN"
+    ],
+    [
+     "Mag ik twee biertjes, alsjeblieft?",
+     "Kann ich zwei Bier haben, bitte?",
+     "ie = langes „i“ – nicht „beertje“ (Bärchen)!",
+     "BIER·tjes  als·je·BLIEFT"
+    ],
+    [
+     "Veel plezier! Proost!",
+     "Viel Spaß! Prost!",
+     "",
+     "ple·ZIER  PROOST"
+    ],
+    [
+     "Dank je! Tot straks!",
+     "Danke! Bis gleich!",
+     "",
+     "STRAKS"
+    ]
+   ],
+   "scene": {
+    "name": "Festivalbar",
+    "who": "Barvrouw",
+    "role": "You are the bartender at a festival bar. Payment is with muntjes (drink tokens). Take his order, tell how many muntjes it costs, small talk about the set.",
+    "goal": "Bestell zwei Getränke, frag, wie viele Muntjes das sind, und sag etwas über das Set.",
+    "open": [
+     "Hoi! Zeg het maar.",
+     "Hi! Sag an."
+    ],
+    "hint": "„Mag ik twee biertjes, alsjeblieft?“"
+   }
+  },
+  {
+   "id": "les1",
+   "title": "Les 1 · Einstufung (29.09.)",
+   "items": [
+    [
+     "Goedemorgen!",
+     "Guten Morgen!",
+     "g = kratziges „ch“ wie in „ach“",
+     "goe·de·MOR·gen"
+    ],
+    [
+     "Ik heet Justin en ik woon in …",
+     "Ich heiße Justin und ich wohne in …",
+     "ij klingt wie „ei“ mit leichtem ä",
+     "HEET  WOON"
+    ],
+    [
+     "een broer en twee zussen",
+     "ein Bruder und zwei Schwestern",
+     "oe = „u“",
+     "BROER  ZUS·sen"
+    ],
+    [
+     "Hoeveel kost dit brood?",
+     "Wie viel kostet dieses Brot?",
+     "",
+     "hoe·VEEL  BROOD"
+    ],
+    [
+     "Mag ik een koffie met melk?",
+     "Darf ich einen Kaffee mit Milch?",
+     "",
+     "KOF·fie  MELK"
+    ],
+    [
+     "Het was erg druk.",
+     "Es war sehr voll.",
+     "druk: u wie kurzes „ö“",
+     "ERG  DRUK"
+    ],
+    [
+     "Als het niet regent, gaan we fietsen.",
+     "Wenn es nicht regnet, fahren wir Rad.",
+     "ie = langes „i“",
+     "RE·gent  FIET·sen"
+    ],
+    [
+     "Ik weet niet of hij komt.",
+     "Ich weiß nicht, ob er kommt.",
+     "ij in „hij“ = „äi“",
+     "WEET  KOMT"
+    ],
+    [
+     "Gisteravond hebben wij een film gezien.",
+     "Gestern Abend haben wir einen Film gesehen.",
+     "z = weiches, stimmhaftes s",
+     "gis·ter·A·vond  ge·ZIEN"
+    ],
+    [
+     "Ik had het eerder moeten zeggen.",
+     "Ich hätte es früher sagen sollen.",
+     "oe in „moeten“ = „u“",
+     "EER·der  ZEG·gen"
+    ],
+    [
+     "Ik heb een beetje gesport en veel biertjes gedronken.",
+     "Ich habe ein bisschen Sport gemacht und viele Bierchen getrunken.",
+     "tj in „biertjes“ ≈ „tch“",
+     "BEET·je  ge·DRON·ken"
+    ]
+   ],
+   "scene": {
+    "name": "Freies Gespräch",
+    "who": "Daan",
+    "role": "You are Daan, a relaxed Dutch guy in his twenties who loves hardcore and uptempo festivals. Free conversation about whatever Justin wants: music, festivals, travel in the Netherlands, weekend, hobbies.",
+    "goal": "Rede einfach drauflos. Daan fragt nach und hält das Gespräch am Laufen.",
+    "open": [
+     "Hoi! Ik ben Daan. Waar zullen we over praten?",
+     "Hi! Ich bin Daan. Worüber sollen wir reden?"
+    ],
+    "hint": "„Ik wil over … praten.“ (festivals, muziek, mijn weekend)"
+   }
+  },
+  {
+   "id": "klanken",
+   "title": "Klanken · schwierige Laute",
+   "items": [
+    [
+     "Een biertje en een water.",
+     "Ein Bier und ein Wasser.",
+     "een = langes „ee“ (ein) · en = kurzes „e“ (und)",
+     "BIER·tje  WA·ter"
+    ],
+    [
+     "Na de set gaan we naar huis.",
+     "Nach dem Set gehen wir nach Hause.",
+     "na = zeitlich · naar mit hörbarem r = Richtung",
+     "naar  HUIS"
+    ],
+    [
+     "Geef mij mijn telefoon.",
+     "Gib mir mein Handy.",
+     "mij = mir · mijn = mein, das n ist hörbar",
+     "te·le·FOON"
+    ],
+    [
+     "Ik kom uit Duitsland en het is koud.",
+     "Ich komme aus Deutschland und es ist kalt.",
+     "ui = „öi“, Lippen rund · ou = „au“",
+     "DUITS·land  KOUD"
+    ],
+    [
+     "Mijn trein is op tijd.",
+     "Mein Zug ist pünktlich.",
+     "ij und ei klingen gleich: „äi“",
+     "TREIN  TIJD"
+    ],
+    [
+     "Ik vind het leuk, maar ik ben moe.",
+     "Ich find's schön, aber ich bin müde.",
+     "eu = „ö“ · oe = „u“",
+     "LEUK  MOE"
+    ],
+    [
+     "Goedemorgen, ik ga naar Scheveningen.",
+     "Guten Morgen, ich fahre nach Scheveningen.",
+     "g = „ch“ hinten im Hals · sch = s + ch, nie deutsches „sch“",
+     "goe·de·MOR·gen  SCHE·ve·nin·gen"
+    ],
+    [
+     "Om negen uur is het druk.",
+     "Um neun Uhr ist es voll.",
+     "uu = langes „ü“ · u in „druk“ = kurzes „ö“",
+     "NE·gen  UUR"
+    ],
+    [
+     "Zullen we even zitten?",
+     "Sollen wir uns kurz hinsetzen?",
+     "z = summendes s wie in „Sonne“",
+     "E·ven  ZIT·ten"
+    ]
+   ]
+  }
+ ]
+}

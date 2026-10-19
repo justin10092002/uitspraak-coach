@@ -1,0 +1,15 @@
+[build]
+  publish = "."
+  command = ""
+  # Nur der main-Branch wird veröffentlicht; Fortschritts-Commits (Branch "progress") lösen keinen Build aus.
+  ignore = "if [ \"$BRANCH\" = \"main\" ]; then exit 1; else exit 0; fi"
+
+[[headers]]
+  for = "/lessons.json"
+  [headers.values]
+    Cache-Control = "no-cache"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache"
