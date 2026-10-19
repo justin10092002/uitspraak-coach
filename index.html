@@ -472,13 +472,13 @@ async function getMic(){
     const dst=ctx.createMediaStreamDestination();
     src.connect(g);g.connect(comp);comp.connect(an);comp.connect(dst);
     // capture PCM for the AI coach (Gemini wants WAV)
-    const pcm=[];let pcmLen=0;const maxLen=ctx.sampleRate*30;
+    const pcm=[];let pcmLen=0;const maxLen=ctx.sampleRate*30;let out=null;
     const sp=ctx.createScriptProcessor(4096,1,1);const mute=ctx.createGain();mute.gain.value=0;
-    sp.onaudioprocess=e=>{if(pcmLen<maxLen){const d=new Float32Array(e.inputBuffer.getChannelData(0));pcm.push(d);pcmLen+=d.length}};
+    sp.onaudioprocess=e=>{const d=new Float32Array(e.inputBuffer.getChannelData(0));if(pcmLen<maxLen){pcm.push(d);pcmLen+=d.length}if(out._onPcm)out._onPcm(d,ctx.sampleRate)};
     comp.connect(sp);sp.connect(mute);mute.connect(ctx.destination);
     lastWav=null;
     startMeter(an);
-    const out=dst.stream;
+    out=dst.stream;
     out._release=()=>{stopMeter();try{src.disconnect();g.disconnect();comp.disconnect();an.disconnect();sp.disconnect();mute.disconnect()}catch(e){}
       try{lastWav=encodeWav(pcm,ctx.sampleRate)}catch(e){lastWav=null}
       raw.getTracks().forEach(t=>t.stop());out.getTracks().forEach(t=>t.stop())};
@@ -486,6 +486,15 @@ async function getMic(){
   }catch(e){return raw}
 }
 let lastWav=null;
+/* Feeds boosted mic audio to Azure as 16 kHz PCM (iPhone rejects the processed MediaStream with error 1007). */
+function makeResampler(write){
+  let pos=0;
+  return (d,rate)=>{const ratio=rate/16000;const outN=Math.floor((d.length-pos)/ratio);if(outN<=0){pos-=d.length;return}
+    const buf=new Int16Array(outN);
+    for(let i=0;i<outN;i++){const a=Math.floor(pos+i*ratio),b=Math.min(d.length,Math.floor(pos+(i+1)*ratio));let sum=0,c=0;for(let k=Math.max(0,a);k<b;k++){sum+=d[k];c++}
+      const x=Math.max(-1,Math.min(1,c?sum/c:0));buf[i]=x<0?x*0x8000:x*0x7fff}
+    pos=pos+outN*ratio-d.length;write(buf.buffer)};
+}
 function encodeWav(chunks,rate){
   const len=chunks.reduce((a,c)=>a+c.length,0);if(len<rate*0.3) return null;
   const all=new Float32Array(len);let o=0;for(const c of chunks){all.set(c,o);o+=c.length}
@@ -528,21 +537,28 @@ function recognizeAzure(reference,onListening,onUrl){
     onListening&&onListening();
     startOwnRecording(mic,onUrl);
     const usePA=!!reference||unscriptedOK;
-    let rec;
+    let rec,pushStream=null;
+    const closePush=()=>{if(mic)mic._onPcm=null;try{pushStream&&pushStream.close()}catch(e){}};
     try{
       const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
       sc.speechRecognitionLanguage='nl-NL';
       sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,'10000');
       sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,reference?'2500':'2000');
       sc.setProperty(SpeechSDK.PropertyId.Speech_SegmentationSilenceTimeoutMs,reference?'2000':'1500');
-      rec=new SpeechSDK.SpeechRecognizer(sc,SpeechSDK.AudioConfig.fromStreamInput(mic));
+      let ac;
+      if(mic._release){ // our processed stream: push PCM ourselves
+        pushStream=SpeechSDK.AudioInputStream.createPushStream(SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000,16,1));
+        const ps=pushStream;mic._onPcm=makeResampler(buf=>{try{ps.write(buf)}catch(e){}});
+        ac=SpeechSDK.AudioConfig.fromStreamInput(ps);
+      }else ac=SpeechSDK.AudioConfig.fromStreamInput(mic);
+      rec=new SpeechSDK.SpeechRecognizer(sc,ac);
       if(usePA){
         const pa=SpeechSDK.PronunciationAssessmentConfig.fromJSON(JSON.stringify({referenceText:reference||'',gradingSystem:'HundredMark',granularity:'Phoneme',enableMiscue:!!reference}));
         pa.applyTo(rec);
       }
     }catch(e){stopOwnRecording();stopMic();reject({msg:'Azure konnte nicht starten.',sub:String(e&&e.message||e)});return}
     rec.recognizeOnceAsync(r=>{
-      stopOwnRecording();setTimeout(stopMic,300);
+      closePush();stopOwnRecording();setTimeout(stopMic,300);
       try{
         if(r.reason===SpeechSDK.ResultReason.Canceled){
           const d=SpeechSDK.CancellationDetails.fromResult(r);
@@ -557,7 +573,7 @@ function recognizeAzure(reference,onListening,onUrl){
           return {w:w.Word,score:et==='Omission'?0:(a.AccuracyScore==null?null:Math.round(a.AccuracyScore)),err:et,phs:(w.Phonemes||[]).map(p=>({p:p.Phoneme||'',s:Math.round(p.PronunciationAssessment?.AccuracyScore??0)}))}});
         resolve({text:r.text||nb.Display||'',words,scores:pa?{pron:pa.PronScore,acc:pa.AccuracyScore,flu:pa.FluencyScore,comp:pa.CompletenessScore}:null});
       }finally{rec.close()}
-    },err=>{stopOwnRecording();stopMic();rec.close();reject({msg:'Mikrofon oder Verbindung hat nicht geklappt.',sub:String(err)})});
+    },err=>{closePush();stopOwnRecording();stopMic();rec.close();reject({msg:'Mikrofon oder Verbindung hat nicht geklappt.',sub:String(err)})});
   });
 }
 /* Browser fallback (no Azure). Resolves {text, alts} */
