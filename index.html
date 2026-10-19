@@ -85,6 +85,11 @@ legend{font-weight:700;font-size:.9rem;padding:0 4px}
 @keyframes pulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--bad) 25%,transparent)}}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}}
 .status{font-weight:600}
+.coachbox{background:var(--bg);border:1px solid var(--accent);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.coachbox .ttl{font-family:var(--display);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+.coachbox .say{line-height:1.55}
+.coachbox .say b{color:var(--accent)}
+.coachbox ul{margin:0;padding-left:18px;font-size:.92rem}
 .meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
 .meter i{display:block;height:100%;width:0;background:var(--good);transition:width .08s linear}
 .meter.low i{background:var(--mid)}
@@ -181,6 +186,7 @@ input[type=range]{accent-color:var(--accent);flex:1;min-width:0}
 
     <fieldset>
       <legend>Gesprächspartner (KI)</legend>
+      <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="autoCoach"> KI-Coach erklärt jeden Aussprache-Satz automatisch (gesprochen)</label>
       <div class="row">
         <select id="provider" aria-label="KI-Anbieter">
           <option value="gemini">Google Gemini (kostenlos)</option>
@@ -465,12 +471,34 @@ async function getMic(){
     const an=ctx.createAnalyser();an.fftSize=512;
     const dst=ctx.createMediaStreamDestination();
     src.connect(g);g.connect(comp);comp.connect(an);comp.connect(dst);
+    // capture PCM for the AI coach (Gemini wants WAV)
+    const pcm=[];let pcmLen=0;const maxLen=ctx.sampleRate*30;
+    const sp=ctx.createScriptProcessor(4096,1,1);const mute=ctx.createGain();mute.gain.value=0;
+    sp.onaudioprocess=e=>{if(pcmLen<maxLen){const d=new Float32Array(e.inputBuffer.getChannelData(0));pcm.push(d);pcmLen+=d.length}};
+    comp.connect(sp);sp.connect(mute);mute.connect(ctx.destination);
+    lastWav=null;
     startMeter(an);
     const out=dst.stream;
-    out._release=()=>{stopMeter();try{src.disconnect();g.disconnect();comp.disconnect();an.disconnect()}catch(e){}raw.getTracks().forEach(t=>t.stop());out.getTracks().forEach(t=>t.stop())};
+    out._release=()=>{stopMeter();try{src.disconnect();g.disconnect();comp.disconnect();an.disconnect();sp.disconnect();mute.disconnect()}catch(e){}
+      try{lastWav=encodeWav(pcm,ctx.sampleRate)}catch(e){lastWav=null}
+      raw.getTracks().forEach(t=>t.stop());out.getTracks().forEach(t=>t.stop())};
     return out;
   }catch(e){return raw}
 }
+let lastWav=null;
+function encodeWav(chunks,rate){
+  const len=chunks.reduce((a,c)=>a+c.length,0);if(len<rate*0.3) return null;
+  const all=new Float32Array(len);let o=0;for(const c of chunks){all.set(c,o);o+=c.length}
+  const target=16000,ratio=rate/target,n=Math.floor(len/ratio);
+  const buf=new ArrayBuffer(44+n*2),v=new DataView(buf);
+  const ws=(off,str)=>{for(let i=0;i<str.length;i++)v.setUint8(off+i,str.charCodeAt(i))};
+  ws(0,'RIFF');v.setUint32(4,36+n*2,true);ws(8,'WAVE');ws(12,'fmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,target,true);v.setUint32(28,target*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);ws(36,'data');v.setUint32(40,n*2,true);
+  for(let i=0;i<n;i++){let sum=0,cnt=0;const a=Math.floor(i*ratio),b=Math.min(len,Math.floor((i+1)*ratio));for(let k=a;k<b;k++){sum+=all[k];cnt++}
+    const x=Math.max(-1,Math.min(1,cnt?sum/cnt:0));v.setInt16(44+i*2,x<0?x*0x8000:x*0x7fff,true)}
+  return new Uint8Array(buf);
+}
+function bytesToB64(u8){let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s)}
 function micError(e){
   const n=e&&e.name||'';
   if(n==='InsecureContext') return ['Hier darf die Seite kein Mikrofon benutzen.','Öffne die Seite über deinen https-Link direkt in Safari oder Chrome, nicht in einer Vorschau.'];
@@ -554,7 +582,7 @@ function parseJSON(t){
   const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1))}catch(e){}}
   throw {msg:'Die KI-Antwort kam unvollständig an.',sub:'Versuch es nochmal.'};
 }
-async function llm(system,messages,maxTokens){
+async function llm(system,messages,maxTokens,audio){
   if(!ai()) throw {msg:'Kein KI-Schlüssel eingetragen.',sub:'Öffne oben die Einstellungen.'};
   if(cfg.provider==='claude'){
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':cfg.aikey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -566,7 +594,7 @@ async function llm(system,messages,maxTokens){
   let last=null;
   for(const m of [...new Set(list)]){
     const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(m)+':generateContent?key='+encodeURIComponent(cfg.aikey),{method:'POST',headers:{'content-type':'application/json'},
-      body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:messages.map(x=>({role:x.role==='assistant'?'model':'user',parts:[{text:x.content}]})),generationConfig:{responseMimeType:'application/json',temperature:0.7,maxOutputTokens:maxTokens||800}})});
+      body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:messages.map((x,i)=>({role:x.role==='assistant'?'model':'user',parts:(audio&&i===messages.length-1?[{inline_data:{mime_type:'audio/wav',data:audio}}]:[]).concat([{text:x.content}])})),generationConfig:{responseMimeType:'application/json',temperature:0.5,maxOutputTokens:maxTokens||800}})});
     if(res.ok){
       const j=await res.json();store.set('aiWorking',m);
       const txt=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
@@ -818,6 +846,65 @@ function updateQueue(){
   }else q.hidden=true;
 }
 
+/* ================= AI coach (spoken explanation) ================= */
+$('autoCoach').checked=store.get('autoCoach',true);
+$('autoCoach').onchange=()=>store.set('autoCoach',$('autoCoach').checked);
+const DE_VOICE={'nl-NL-MaartenNeural':'de-DE-ConradNeural'};
+function speakSegments(segs){
+  segs=(segs||[]).filter(x=>x&&x.text);if(!segs.length)return;
+  unlockAudio();if(window.speechSynthesis)speechSynthesis.cancel();
+  const browser=()=>{if(!window.speechSynthesis)return;speechSynthesis.cancel();segs.forEach(x=>{const u=new SpeechSynthesisUtterance(x.text);u.lang=x.lang==='nl'?'nl-NL':'de-DE';u.rate=x.lang==='nl'?0.8:1;
+    const v=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(x.lang==='nl'?'nl':'de'));if(v)u.voice=v;speechSynthesis.speak(u)})};
+  if(!az()) return browser();
+  const de=DE_VOICE[cfg.voice]||'de-DE-KatjaNeural';
+  const ssml='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="de-DE">'+segs.map(x=>x.lang==='nl'
+    ?`<voice name="${cfg.voice}"><prosody rate="-20%">${esc(x.text)}</prosody></voice>`:`<voice name="${de}">${esc(x.text)}</voice>`).join('')+'</speak>';
+  try{
+    const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
+    sc.speechSynthesisOutputFormat=SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
+    const syn=new SpeechSDK.SpeechSynthesizer(sc,null);
+    syn.speakSsmlAsync(ssml,r=>{syn.close();if(r.reason===SpeechSDK.ResultReason.SynthesizingAudioCompleted&&r.audioData&&r.audioData.byteLength)playBytes(r.audioData).catch(browser);else browser()},()=>{syn.close();browser()});
+  }catch(e){browser()}
+}
+async function waitWav(){for(let i=0;i<15&&!lastWav;i++)await new Promise(r=>setTimeout(r,100));return lastWav}
+async function runCoach(box,info){
+  if(!ai()){box.querySelector('.say').textContent='Für den KI-Coach brauchst du einen Gemini-Schlüssel (Einstellungen).';return}
+  const say=box.querySelector('.say'),btn=box.querySelector('button');
+  btn.disabled=true;say.innerHTML='<span class="thinking">Der Coach hört sich deine Aufnahme an…</span>';
+  const wav=cfg.provider==='gemini'?await waitWav():null;
+  const sys=`You are a warm but honest Dutch pronunciation coach for Justin, a German native speaker (level A2) who wants to sound understandable at Dutch festivals.
+${wav?'Listen carefully to the attached recording of Justin.':'There is no recording; rely only on the measurements below.'}
+Explain IN GERMAN, as if you were talking to him out loud, how he actually pronounced the sentence: what already sounded good, which words or sounds were off and exactly how they sounded (e.g. "das g in gezellig klang wie ein deutsches g statt wie das ch in 'ach'"), and how to fix it (mouth, lips, tongue, comparison with German sounds, stress). Be concrete and only claim what you can hear or what the measurements show. Max 90 spoken words. Address him with "du".
+Return ONLY JSON:
+{"verdict":"one short German sentence","spoken":[{"lang":"de","text":"German part"},{"lang":"nl","text":"Dutch word or phrase"}],"words":[{"word":"Dutch word","problem":"German, short","tip":"German, short"}]}
+Use lang "nl" only for Dutch words/phrases you quote so they are read by a Dutch voice; everything else "de". words: max 4, only words that need work; [] if all good.`;
+  const msg=`Target sentence: "${info.target}"
+Speech recognition heard: "${info.heard||'-'}"
+`+(info.scores?`Azure scores (0-100): overall ${Math.round(info.scores.pron||0)}, accuracy ${Math.round(info.scores.acc||0)}, fluency ${Math.round(info.scores.flu||0)}, completeness ${Math.round(info.scores.comp||0)}
+Per word: ${info.words.map(w=>w.w+'='+(w.err==='Omission'?'missing':w.score)+(w.phs.some(p=>p.s<60)?' (weak sounds '+w.phs.filter(p=>p.s<60).map(p=>(p.p||'#')+':'+p.s).join(' ')+')':'')).join(', ')}`:`Words not recognized: ${(info.missed||[]).join(', ')||'none'}`);
+  try{
+    const r=await llm(sys,[{role:'user',content:msg}],900,wav?bytesToB64(wav):null);
+    const segs=Array.isArray(r.spoken)?r.spoken.filter(x=>x&&x.text):[];
+    say.innerHTML='';
+    if(r.verdict){const v=document.createElement('div');v.className='verdict';v.textContent=r.verdict;say.append(v)}
+    const p=document.createElement('div');segs.forEach(x=>{const el=document.createElement(x.lang==='nl'?'b':'span');el.textContent=x.text+' ';p.append(el)});say.append(p);
+    const ws=Array.isArray(r.words)?r.words.filter(w=>w&&w.word):[];
+    if(ws.length){const ul=document.createElement('ul');ws.forEach(w=>{const li=document.createElement('li');li.innerHTML=`<b>${esc(w.word)}</b>: ${esc(w.problem||'')} → ${esc(w.tip||'')} `;
+      const pb=document.createElement('button');pb.className='btn sm';pb.textContent='▶';pb.setAttribute('aria-label',w.word+' langsam');pb.onclick=()=>speak(w.word,true);li.append(pb);ul.append(li)});say.append(ul)}
+    btn.disabled=false;btn.textContent='🔊 Nochmal anhören';btn.onclick=()=>speakSegments(segs);
+    speakSegments(segs);
+    record({type:'coach',sentence:info.target,heardAudio:!!wav,verdict:r.verdict||'',words:ws.map(w=>w.word+': '+(w.problem||''))});
+  }catch(e){say.textContent=(e.msg||'Der Coach konnte nicht antworten.')+' '+(e.sub?'('+String(e.sub).slice(0,120)+')':'');btn.disabled=false}
+}
+function offerCoach(info){
+  const res=$('result');
+  const box=document.createElement('div');box.className='coachbox';
+  box.innerHTML='<div class="ttl">KI-Coach</div><div class="say small">Lass dir erklären, wie du den Satz gesprochen hast.</div>';
+  const b=document.createElement('button');b.className='btn primary';b.style.alignSelf='flex-start';b.textContent='🗣 Erklär mir meine Aussprache';
+  b.onclick=()=>runCoach(box,info);box.append(b);res.append(box);
+  if($('autoCoach').checked&&ai()) runCoach(box,info);
+}
+
 /* ================= pronunciation tab ================= */
 let current=null,recording=false;
 const best=store.get('best',{});
@@ -863,6 +950,7 @@ function renderAzure(r){
   const worst=list.filter(x=>(x.w.score??0)<85).sort((a,b)=>(a.w.score??0)-(b.w.score??0))[0];if(worst)worst.b.click();
   if(pron>=85&&practiceQueue.length>1&&queueIdx<practiceQueue.length-1){const nb=document.createElement('button');nb.className='btn primary';nb.textContent='Nächster Satz →';nb.onclick=()=>startQueue(queueIdx+1);res.append(nb)}
   setStatus(pron>=85?'Stark! '+pron+' von 100.':'Ergebnis: '+pron+' von 100.','Tippe ein Wort an, um es genauer zu sehen.');
+  offerCoach({target:current.nl,heard:r.text,scores:r.scores,words:r.words});
 }
 function showWord(detail,w){
   const sc=w.score??0;detail.hidden=false;detail.innerHTML='';
@@ -895,6 +983,7 @@ function renderBasic(r){
   const note=document.createElement('div');note.className='small';note.textContent='Basis-Modus ohne Laut-Bewertung. Mit Azure-Schlüssel bekommst du Punkte für jedes Wort und jeden Laut.';
   res.append(wl,heard,detail,note);const miss=wl.querySelector('.w.bad');if(miss)miss.click();
   setStatus(score===100?'Alle Wörter verstanden!':score+' % der Wörter verstanden.','Tippe rote Wörter an.');
+  if(!r._noCoach) offerCoach({target:current.nl,heard:bestAlt,missed:target.filter((w,i)=>!bestHits[i])});
 }
 function saveBest(s){if(!current)return;if(best[current.nl]==null||s>best[current.nl]){best[current.nl]=s;store.set('best',best);renderLib()}}
 function setCurrent(it,scroll){
