@@ -1,0 +1,144 @@
+{
+ "device": "iPhone",
+ "records": [
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Ik sta bij de grote vlag.",
+   "score": 99,
+   "acc": 99,
+   "flu": 100,
+   "weak": [],
+   "at": "2026-10-19T22:53:28.272Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Waar zijn de toiletten?",
+   "score": 66,
+   "acc": 76,
+   "flu": 59,
+   "weak": [
+    "toiletten:36 [?,?,?,?,?,?]"
+   ],
+   "at": "2026-10-19T22:54:00.508Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Waar zijn de toiletten?",
+   "score": 41,
+   "acc": 52,
+   "flu": 34,
+   "weak": [
+    "Waar:32 [?,?,?]",
+    "toiletten:fehlt"
+   ],
+   "at": "2026-10-19T22:54:41.522Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Waar zijn de toiletten?",
+   "score": 95,
+   "acc": 92,
+   "flu": 100,
+   "weak": [],
+   "at": "2026-10-19T22:55:59.986Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Is het ver hiervandaan?",
+   "score": 56,
+   "acc": 44,
+   "flu": 100,
+   "weak": [
+    "Is:fehlt",
+    "het:fehlt"
+   ],
+   "at": "2026-10-19T22:56:41.615Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Is het ver hiervandaan?",
+   "score": 98,
+   "acc": 96,
+   "flu": 100,
+   "weak": [],
+   "at": "2026-10-19T22:56:52.883Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Rechtdoor, en dan links.",
+   "score": 99,
+   "acc": 99,
+   "flu": 100,
+   "weak": [],
+   "at": "2026-10-19T22:57:07.935Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "score": 99,
+   "acc": 98,
+   "flu": 99,
+   "weak": [],
+   "at": "2026-10-19T22:57:27.591Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Hoe laat is het? Het is half tien.",
+   "score": 61,
+   "acc": 73,
+   "flu": 53,
+   "weak": [
+    "Het:fehlt",
+    "tien:fehlt"
+   ],
+   "at": "2026-10-19T22:57:43.709Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Hoe laat is het? Het is half tien.",
+   "score": 63,
+   "acc": 72,
+   "flu": 56,
+   "weak": [
+    "Het:fehlt",
+    "tien:fehlt"
+   ],
+   "at": "2026-10-19T22:58:02.390Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Hoe laat is het? Het is half tien.",
+   "score": 78,
+   "acc": 83,
+   "flu": 83,
+   "weak": [
+    "Hoe:59 [?]",
+    "is:59 [?,?]"
+   ],
+   "at": "2026-10-19T22:58:46.778Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Hoe laat is het? Het is half tien.",
+   "score": 88,
+   "acc": 92,
+   "flu": 82,
+   "weak": [
+    "Hoe:60 [?]"
+   ],
+   "at": "2026-10-19T22:59:16.908Z"
+  }
+ ]
+}
