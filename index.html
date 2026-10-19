@@ -504,7 +504,9 @@ function recognizeAzure(reference,onListening,onUrl){
     try{
       const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
       sc.speechRecognitionLanguage='nl-NL';
-      sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,'1500');
+      sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,'10000');
+      sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,reference?'2500':'2000');
+      sc.setProperty(SpeechSDK.PropertyId.Speech_SegmentationSilenceTimeoutMs,reference?'2000':'1500');
       rec=new SpeechSDK.SpeechRecognizer(sc,SpeechSDK.AudioConfig.fromStreamInput(mic));
       if(usePA){
         const pa=SpeechSDK.PronunciationAssessmentConfig.fromJSON(JSON.stringify({referenceText:reference||'',gradingSystem:'HundredMark',granularity:'Phoneme',enableMiscue:!!reference}));
@@ -519,7 +521,7 @@ function recognizeAzure(reference,onListening,onUrl){
           if(!reference&&usePA&&!/401|1006|auth|subscription|key/i.test(d.errorDetails)){unscriptedOK=false;store.set('unscriptedOK',false);reject({msg:'Bitte nochmal sprechen.',sub:'Ich habe die freie Aussprache-Bewertung abgeschaltet, sie wird hier nicht unterstützt.'});return}
           reject({msg:'Das hat nicht geklappt.',sub:/401|1006|auth/i.test(d.errorDetails)?'Azure-Schlüssel oder Region stimmt nicht. Prüfe die Einstellungen.':d.errorDetails});return;
         }
-        if(r.reason===SpeechSDK.ResultReason.NoMatch){reject({msg:'Ich habe nichts verstanden.',sub:'Sprich etwas lauter und näher am Mikrofon.'});return}
+        if(r.reason===SpeechSDK.ResultReason.NoMatch){reject({msg:'Ich habe nichts verstanden.',sub:'Nichts gehört. Sprich direkt nach dem Tippen los, halte das iPhone näher an den Mund oder stell in den Einstellungen die Mikrofon-Verstärkung höher.',code:'nomatch'});return}
         const j=JSON.parse(r.properties.getProperty(SpeechSDK.PropertyId.SpeechServiceResponse_JsonResult)||'{}');
         const nb=j.NBest&&j.NBest[0]||{};
         const pa=nb.PronunciationAssessment||null;
@@ -710,7 +712,7 @@ $('talkRec').onclick=async()=>{
     btn.classList.remove('on');
     if(!r.text.trim()){btn.disabled=false;setTalk('Ich habe nichts verstanden.','Versuch es nochmal.');return}
     await talkTurn({who:'me',text:r.text.trim(),words:r.words,scores:r.scores});
-  }catch(e){btn.classList.remove('on');btn.disabled=false;setTalk(e.msg||'Fehler',e.sub||'')}
+  }catch(e){btn.classList.remove('on');btn.disabled=false;setTalk(e.msg||'Fehler',e.sub||'');record({type:'fail',where:'gespraech',lesson:convo.pack.id,reason:e.code||e.msg||'',detail:String(e.sub||'').slice(0,160),gain:micGain})}
 };
 $('typeBtn').onclick=()=>{$('typeBox').hidden=!$('typeBox').hidden;if(!$('typeBox').hidden)$('typeIn').focus()};
 $('typeSend').onclick=()=>{const v=$('typeIn').value.trim();if(!v||talkBusy||!convo||convo.ended)return;if(!ai()){setTalk('Kein KI-Schlüssel eingetragen.','Öffne oben die Einstellungen.');return}$('typeIn').value='';unlockAudio();talkTurn({who:'me',text:v,typed:true,words:[],scores:null})};
@@ -830,11 +832,15 @@ $('rec').onclick=async()=>{
   try{
     if(az()){const r=await recognizeAzure(current.nl,onL,()=>{$('mine').disabled=false});renderAzure(r)}
     else{const r=await recognizeBrowser(onL);renderBasic(r)}
-  }catch(e){setStatus(e.msg||'Fehler',e.sub||'')}
+  }catch(e){setStatus(e.msg||'Fehler',e.sub||'');record({type:'fail',where:'aussprache',sentence:current.nl,reason:e.code||e.msg||'',detail:String(e.sub||'').slice(0,160),gain:micGain})}
   finally{setRec(false)}
 };
 function renderAzure(r){
-  if(!r.scores){setStatus('Keine Bewertung erhalten.','Versuch es nochmal.');return}
+  if(!r.scores){
+    record({type:'fail',where:'aussprache',sentence:current.nl,reason:'noscore',heard:r.text||'',gain:micGain});
+    if(r.text){renderBasic({text:r.text,alts:[r.text]});setStatus('Keine Laut-Bewertung erhalten.','Azure hat „'+r.text+'“ verstanden, aber keine Punkte geliefert. Sprich den ganzen Satz ohne lange Pause.')}
+    else setStatus('Keine Bewertung erhalten.','Sprich den ganzen Satz in einem Zug und versuch es nochmal.');
+    return}
   const pron=Math.round(r.scores.pron??r.scores.acc??0);saveBest(pron);
   record({type:'pron',lesson:current.pack||'',sentence:current.nl,score:pron,acc:Math.round(r.scores.acc||0),flu:Math.round(r.scores.flu||0),
     weak:r.words.filter(w=>w.err!=='Insertion'&&(w.score??0)<70).map(w=>w.w+':'+(w.err==='Omission'?'fehlt':w.score)+(w.phs.some(p=>p.s<60)?' ['+w.phs.filter(p=>p.s<60).map(p=>p.p||'?').join(',')+']':''))});
