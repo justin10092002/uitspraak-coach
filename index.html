@@ -85,6 +85,10 @@ legend{font-weight:700;font-size:.9rem;padding:0 4px}
 @keyframes pulse{50%{box-shadow:0 0 0 10px color-mix(in srgb,var(--bad) 25%,transparent)}}
 @media (prefers-reduced-motion:reduce){.rec.on{animation:none}}
 .status{font-weight:600}
+.meter{height:6px;border-radius:3px;background:var(--line);overflow:hidden;margin-top:6px}
+.meter i{display:block;height:100%;width:0;background:var(--good);transition:width .08s linear}
+.meter.low i{background:var(--mid)}
+input[type=range]{accent-color:var(--accent);flex:1;min-width:0}
 .typebox{display:flex;gap:8px}
 .typebox input{flex:1}
 
@@ -160,6 +164,12 @@ legend{font-weight:700;font-size:.9rem;padding:0 4px}
         </select>
       </div>
       <div class="row">
+        <label class="small" for="gain">Mikrofon-Verstärkung:</label>
+        <input type="range" id="gain" min="1" max="6" step="0.5">
+        <span class="small" id="gainVal"></span>
+      </div>
+      <div class="small">Musst du laut sprechen, damit du verstanden wirst? Regler nach rechts. Wird es verzerrt oder erkennt er Wörter, die du nicht gesagt hast? Regler nach links.</div>
+      <div class="row">
         <label class="small" for="voice">Stimme:</label>
         <select id="voice">
           <option value="nl-NL-FennaNeural">Fenna (weiblich)</option>
@@ -230,6 +240,7 @@ legend{font-weight:700;font-size:.9rem;padding:0 4px}
         <div class="grow">
           <div class="status" id="talkStatus">Hör zu und antworte mit dem Mikrofon.</div>
           <div class="small" id="talkSub"></div>
+          <div class="meter" id="talkMeter" hidden><i></i></div>
         </div>
       </div>
       <div class="row">
@@ -266,6 +277,7 @@ legend{font-weight:700;font-size:.9rem;padding:0 4px}
         <div class="grow">
           <div class="status" id="status">Tippe aufs Mikrofon und sprich den Satz.</div>
           <div class="small" id="statusSub">Die Aufnahme stoppt automatisch, wenn du fertig bist.</div>
+          <div class="meter" id="pronMeter" hidden><i></i></div>
         </div>
       </div>
       <div id="result" class="col" hidden></div>
@@ -422,9 +434,42 @@ function playBtn(text,label){const b=document.createElement('button');b.classNam
 
 /* ================= microphone ================= */
 const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+let micGain=+store.get('micGain',2.5);
+$('gain').value=micGain;$('gainVal').textContent=micGain+'×';
+$('gain').oninput=()=>{micGain=+$('gain').value;$('gainVal').textContent=micGain+'×';store.set('micGain',micGain)};
+let actx=null;
+function ensureCtx(){ // call synchronously inside a tap so iOS allows audio processing
+  try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return null;if(!actx)actx=new C();if(actx.state==='suspended')actx.resume();return actx}catch(e){return null}
+}
+let meterRaf=0;
+function startMeter(analyser){
+  const buf=new Uint8Array(analyser.fftSize);
+  const els=[$('talkMeter'),$('pronMeter')];els.forEach(m=>m.hidden=false);
+  const tick=()=>{analyser.getByteTimeDomainData(buf);let peak=0;for(const v of buf)peak=Math.max(peak,Math.abs(v-128));
+    const pct=Math.min(100,Math.round(peak/128*140));els.forEach(m=>{m.querySelector('i').style.width=pct+'%';m.classList.toggle('low',pct<25)});
+    meterRaf=requestAnimationFrame(tick)};
+  tick();
+}
+function stopMeter(){cancelAnimationFrame(meterRaf);[$('talkMeter'),$('pronMeter')].forEach(m=>{m.hidden=true;m.querySelector('i').style.width='0'})}
 async function getMic(){
   if(!window.isSecureContext||!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){const e=new Error('insecure');e.name='InsecureContext';throw e}
-  return navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}});
+  const raw=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+  const ctx=actx||ensureCtx();
+  if(!ctx) return raw;
+  try{
+    if(ctx.state==='suspended') await ctx.resume();
+    const src=ctx.createMediaStreamSource(raw);
+    const g=ctx.createGain();g.gain.value=micGain;
+    const comp=ctx.createDynamicsCompressor(); // keeps loud parts from clipping when boosted
+    comp.threshold.value=-12;comp.knee.value=10;comp.ratio.value=6;comp.attack.value=0.003;comp.release.value=0.15;
+    const an=ctx.createAnalyser();an.fftSize=512;
+    const dst=ctx.createMediaStreamDestination();
+    src.connect(g);g.connect(comp);comp.connect(an);comp.connect(dst);
+    startMeter(an);
+    const out=dst.stream;
+    out._release=()=>{stopMeter();try{src.disconnect();g.disconnect();comp.disconnect();an.disconnect()}catch(e){}raw.getTracks().forEach(t=>t.stop());out.getTracks().forEach(t=>t.stop())};
+    return out;
+  }catch(e){return raw}
 }
 function micError(e){
   const n=e&&e.name||'';
@@ -451,7 +496,7 @@ function recognizeAzure(reference,onListening,onUrl){
   return new Promise(async(resolve,reject)=>{
     let mic;
     try{mic=await getMic()}catch(e){const [a,b]=micError(e);reject({msg:a,sub:b});return}
-    const stopMic=()=>{try{mic.getTracks().forEach(t=>t.stop())}catch(e){}};
+    const stopMic=()=>{try{mic._release?mic._release():mic.getTracks().forEach(t=>t.stop())}catch(e){}};
     onListening&&onListening();
     startOwnRecording(mic,onUrl);
     const usePA=!!reference||unscriptedOK;
@@ -658,7 +703,7 @@ async function talkTurn(entry){
 $('talkRec').onclick=async()=>{
   if(!convo||talkBusy||convo.ended)return;
   if(!ai()){setTalk('Kein KI-Schlüssel eingetragen.','Öffne oben die Einstellungen.');$('setup').open=true;return}
-  unlockAudio();player.pause();
+  unlockAudio();ensureCtx();player.pause();
   const btn=$('talkRec');btn.disabled=true;btn.classList.add('on');setTalk('Mikrofon startet…','');
   try{
     const r=az()?await recognizeAzure('',()=>setTalk('Ich höre zu… sprich jetzt.','Stoppt automatisch nach einer kurzen Pause.')):await recognizeBrowser(()=>setTalk('Ich höre zu… sprich jetzt.',''));
@@ -780,7 +825,7 @@ $('listen').onclick=()=>current&&speak(current.nl,false);
 $('listenSlow').onclick=()=>current&&speak(current.nl,true);
 $('mine').onclick=()=>{if(lastUrl){player.pause();player.src=lastUrl;player.currentTime=0;player.play().catch(()=>{})}};
 $('rec').onclick=async()=>{
-  if(!current||recording)return;unlockAudio();player.pause();setRec(true);setStatus('Mikrofon startet…','');
+  if(!current||recording)return;unlockAudio();ensureCtx();player.pause();setRec(true);setStatus('Mikrofon startet…','');
   const onL=()=>setStatus('Ich höre zu… sprich jetzt.','Stoppt automatisch nach einer kurzen Pause.');
   try{
     if(az()){const r=await recognizeAzure(current.nl,onL,()=>{$('mine').disabled=false});renderAzure(r)}
