@@ -1,0 +1,14 @@
+{
+ "device": "iPhone",
+ "records": [
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Hoe laat is het? Het is half tien.",
+   "reason": "Das hat nicht geklappt.",
+   "detail": "Could not validate speech context. websocket error code: 1007",
+   "gain": 2.5,
+   "at": "2026-10-19T23:06:57.357Z"
+  }
+ ]
+}
