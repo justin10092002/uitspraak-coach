@@ -187,7 +187,7 @@ input[type=range]{accent-color:var(--accent);flex:1;min-width:0}
     <fieldset>
       <legend>Gesprächspartner (KI)</legend>
       <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="handsfree"> Freihändig: nach jeder Antwort automatisch zuhören</label>
-      <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="autoCoach"> KI-Coach erklärt jeden Aussprache-Satz automatisch (gesprochen)</label>
+      <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="autoCoach"> KI-Coach startet automatisch (sonst nur auf Antippen)</label>
       <div class="row">
         <select id="provider" aria-label="KI-Anbieter">
           <option value="gemini">Google Gemini (kostenlos)</option>
@@ -476,7 +476,15 @@ async function getMic(){
     // capture PCM for the AI coach (Gemini wants WAV)
     const pcm=[];let pcmLen=0;const maxLen=ctx.sampleRate*30;let out=null;
     const sp=ctx.createScriptProcessor(4096,1,1);const mute=ctx.createGain();mute.gain.value=0;
-    sp.onaudioprocess=e=>{const d=new Float32Array(e.inputBuffer.getChannelData(0));if(pcmLen<maxLen){pcm.push(d);pcmLen+=d.length}if(out._onPcm)out._onPcm(d,ctx.sampleRate)};
+    // voice activity: stop as soon as you go quiet after speaking
+    let vt=0,floor=null,heard=false,speechMs=0,silent=0;
+    sp.onaudioprocess=e=>{const d=new Float32Array(e.inputBuffer.getChannelData(0));if(pcmLen<maxLen){pcm.push(d);pcmLen+=d.length}if(out._onPcm)out._onPcm(d,ctx.sampleRate);
+      const v=out._vad;if(!v)return;
+      let sq=0;for(let i=0;i<d.length;i++)sq+=d[i]*d[i];const rms=Math.sqrt(sq/d.length),ms=d.length/ctx.sampleRate*1000;vt+=ms;
+      if(vt<300)floor=floor==null?rms:Math.min(floor,rms);
+      const hi=Math.max(0.035,(floor||0)*3),lo=Math.max(0.018,(floor||0)*1.8);
+      if(rms>hi){heard=true;speechMs+=ms;silent=0}else if(heard)silent+=rms<lo?ms:ms*0.5;
+      if((heard&&speechMs>250&&silent>=v.silenceMs)||vt>20000){out._vad=null;v.onEnd()}};
     comp.connect(sp);sp.connect(mute);mute.connect(ctx.destination);
     lastWav=null;
     startMeter(an);
@@ -531,7 +539,8 @@ function stopOwnRecording(){try{if(mediaRec&&mediaRec.state!=='inactive')mediaRe
 /* Azure recognition. reference = text to score against, or '' for free speech.
    Resolves {text, words:[{w,score,err,phs}], scores:{pron,acc,flu,comp}} ; rejects {msg,sub} */
 let unscriptedOK=store.get('unscriptedOK',true);
-function recognizeAzure(reference,onListening,onUrl){
+let stopNow=null;
+function recognizeAzure(reference,onListening,onUrl,onStopped){
   return new Promise(async(resolve,reject)=>{
     let mic;
     try{mic=await getMic()}catch(e){const [a,b]=micError(e);reject({msg:a,sub:b});return}
@@ -540,7 +549,7 @@ function recognizeAzure(reference,onListening,onUrl){
     startOwnRecording(mic,onUrl);
     const usePA=!!reference||unscriptedOK;
     let rec,pushStream=null;
-    const closePush=()=>{if(mic)mic._onPcm=null;try{pushStream&&pushStream.close()}catch(e){}};
+    const closePush=()=>{stopNow=null;if(mic){mic._onPcm=null;mic._vad=null}try{pushStream&&pushStream.close()}catch(e){}};
     try{
       const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
       sc.speechRecognitionLanguage='nl-NL';
@@ -552,6 +561,8 @@ function recognizeAzure(reference,onListening,onUrl){
       if(mic._release){ // our processed stream: push PCM ourselves
         pushStream=SpeechSDK.AudioInputStream.createPushStream(SpeechSDK.AudioStreamFormat.getWaveFormatPCM(16000,16,1));
         const ps=pushStream;mic._onPcm=makeResampler(buf=>{try{ps.write(buf)}catch(e){}});
+        mic._vad={silenceMs:reference?800:600,onEnd:()=>{closePush();onStopped&&onStopped()}};
+        stopNow=()=>{closePush();onStopped&&onStopped()};
         ac=SpeechSDK.AudioConfig.fromStreamInput(ps);
       }else ac=SpeechSDK.AudioConfig.fromStreamInput(mic);
       rec=new SpeechSDK.SpeechRecognizer(sc,ac);
@@ -756,13 +767,14 @@ async function talkTurn(entry){
   }finally{talkBusy=false;$('talkRec').disabled=false;renderLog()}
 }
 $('talkRec').onclick=async()=>{
-  if(!convo||talkBusy||convo.ended)return;
+  if(stopNow){stopNow();return}
+  if(!convo||talkBusy||convo.ended||$('talkRec').classList.contains('on'))return;
   if(!ai()){setTalk('Kein KI-Schlüssel eingetragen.','Öffne oben die Einstellungen.');$('setup').open=true;return}
   unlockAudio();ensureCtx();player.pause();
-  const btn=$('talkRec');btn.disabled=true;btn.classList.add('on');setTalk('Mikrofon startet…','');
+  const btn=$('talkRec');btn.classList.add('on');setTalk('Mikrofon startet…','');
   try{
-    const r=az()?await recognizeAzure('',()=>setTalk('Ich höre zu… sprich jetzt.','Stoppt automatisch nach einer kurzen Pause.')):await recognizeBrowser(()=>setTalk('Ich höre zu… sprich jetzt.',''));
-    btn.classList.remove('on');
+    const r=az()?await recognizeAzure('',()=>setTalk('Ich höre zu… sprich jetzt.','Stoppt, sobald du aufhörst, oder tippe nochmal auf 🎤.'),null,()=>{btn.classList.remove('on');setTalk('Verstanden, einen Moment…','')}):await recognizeBrowser(()=>setTalk('Ich höre zu… sprich jetzt.',''));
+    btn.classList.remove('on');btn.disabled=true;
     if(!r.text.trim()){btn.disabled=false;setTalk('Ich habe nichts verstanden.','Versuch es nochmal.');return}
     await talkTurn({who:'me',text:r.text.trim(),words:r.words,scores:r.scores});
   }catch(e){btn.classList.remove('on');btn.disabled=false;setTalk(e.msg||'Fehler',e.sub||'');record({type:'fail',where:'gespraech',lesson:convo.pack.id,reason:e.code||e.msg||'',detail:String(e.sub||'').slice(0,160),gain:micGain})}
@@ -824,6 +836,9 @@ function renderFeedback(r,mine){
       const you=document.createElement('div');you.className='you'+(ok?' ok':'');you.textContent=(ok?'✓ ':'')+(t.you||m.text||'');
       c.append(you);
       if(m.scores&&typeof m.scores.pron==='number'){const p=document.createElement('span');p.className='pill '+cls(m.scores.pron);p.textContent='Aussprache '+Math.round(m.scores.pron);p.style.alignSelf='flex-start';c.append(p)}
+      const ww=(m.words||[]).filter(w=>w.score!=null&&w.err!=='Insertion');
+      if(ww.length){const wl=document.createElement('div');wl.className='words';ww.forEach(w=>{const b=document.createElement('button');b.className='w '+cls(w.score);b.innerHTML=`<span>${esc(w.w)}</span><small>${w.score} P.</small>`;b.setAttribute('aria-label',w.w+' langsam anhören');b.onclick=()=>speak(w.w,true);wl.append(b)});c.append(wl)}
+      else if(m.words&&!m.typed){const n=document.createElement('div');n.className='small';n.textContent='Für frei gesprochene Sätze liefert Azure hier keine Wort-Punkte. Übe den korrigierten Satz unten, dann bekommst du Punkte pro Wort.';c.append(n)}
       if(t.better){
         const b=document.createElement('div');b.className='row';
         const tx=document.createElement('div');tx.className='better grow';tx.textContent=t.better;
@@ -878,8 +893,8 @@ function updateQueue(){
 }
 
 /* ================= AI coach (spoken explanation) ================= */
-$('autoCoach').checked=store.get('autoCoach',true);
-$('autoCoach').onchange=()=>store.set('autoCoach',$('autoCoach').checked);
+$('autoCoach').checked=store.get('autoCoachOn',false);
+$('autoCoach').onchange=()=>store.set('autoCoachOn',$('autoCoach').checked);
 const DE_VOICE={'nl-NL-MaartenNeural':'de-DE-ConradNeural'};
 function speakSegments(segs){
   segs=(segs||[]).filter(x=>x&&x.text);if(!segs.length)return;
@@ -924,7 +939,9 @@ Per word: ${info.words.map(w=>w.w+'='+(w.err==='Omission'?'missing':w.score)+(w.
     if(r.verdict){const v=document.createElement('div');v.className='verdict';v.textContent=r.verdict;say.append(v)}
     const p=document.createElement('div');segs.forEach(x=>{const el=document.createElement(x.lang==='nl'?'b':'span');el.textContent=x.text+' ';p.append(el)});say.append(p);
     const ws=Array.isArray(r.words)?r.words.filter(w=>w&&w.word):[];
-    if(ws.length){const ul=document.createElement('ul');ws.forEach(w=>{const li=document.createElement('li');li.innerHTML=`<b>${esc(w.word)}</b>: ${esc(w.problem||'')} → ${esc(w.tip||'')} `;
+    const ptsFor=word=>{const k=tokens(word).join(' ');const hit=(info.words||[]).find(x=>tokens(x.w).join(' ')===k);return hit?(hit.err==='Omission'?'fehlt':hit.score):null};
+    if(ws.length){const ul=document.createElement('ul');ws.forEach(w=>{const li=document.createElement('li');const pt=ptsFor(w.word);
+      li.innerHTML=`<b>${esc(w.word)}</b>`+(pt!=null?` <span class="pill ${typeof pt==='number'?cls(pt):'bad'}">${pt}${typeof pt==='number'?' P.':''}</span>`:'')+`: ${esc(w.problem||'')} → ${esc(w.tip||'')} `;
       const pb=document.createElement('button');pb.className='btn sm';pb.textContent='▶';pb.setAttribute('aria-label',w.word+' langsam');pb.onclick=()=>speak(w.word,true);li.append(pb);ul.append(li)});say.append(ul)}
     btn.disabled=false;btn.textContent='🔊 Nochmal anhören';btn.onclick=()=>speakSegments(segs);
     speakSegments(segs);
@@ -944,15 +961,16 @@ function offerCoach(info){
 let current=null,recording=false;
 const best=store.get('best',{});
 function setStatus(a,b){$('status').textContent=a;$('statusSub').textContent=b||''}
-function setRec(on){recording=on;$('rec').classList.toggle('on',on);$('rec').disabled=on}
+function setRec(on){recording=on;$('rec').classList.toggle('on',on)}
 $('listen').onclick=()=>current&&speak(current.nl,false);
 $('listenSlow').onclick=()=>current&&speak(current.nl,true);
 $('mine').onclick=()=>{if(lastUrl){player.pause();player.src=lastUrl;player.currentTime=0;player.play().catch(()=>{})}};
 $('rec').onclick=async()=>{
+  if(stopNow){stopNow();return}
   if(!current||recording)return;unlockAudio();ensureCtx();player.pause();setRec(true);setStatus('Mikrofon startet…','');
   const onL=()=>setStatus('Ich höre zu… sprich jetzt.','Stoppt automatisch nach einer kurzen Pause.');
   try{
-    if(az()){const r=await recognizeAzure(current.nl,onL,()=>{$('mine').disabled=false});renderAzure(r)}
+    if(az()){const r=await recognizeAzure(current.nl,()=>setStatus('Ich höre zu… sprich jetzt.','Stoppt, sobald du aufhörst, oder tippe nochmal auf 🎤.'),()=>{$('mine').disabled=false},()=>{$('rec').classList.remove('on');setStatus('Werte aus…','')});renderAzure(r)}
     else{const r=await recognizeBrowser(onL);renderBasic(r)}
   }catch(e){setStatus(e.msg||'Fehler',e.sub||'');record({type:'fail',where:'aussprache',sentence:current.nl,reason:e.code||e.msg||'',detail:String(e.sub||'').slice(0,160),gain:micGain})}
   finally{setRec(false)}
