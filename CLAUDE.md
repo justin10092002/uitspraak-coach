@@ -17,5 +17,7 @@ Persönliche Sprech- und Aussprache-App von Justin (Deutsch → Niederländisch,
 Betonung: Silben mit `·`, betonte Silbe GROSS, Wörter mit zwei Leerzeichen. Neueste Lektion vorne im Array einfügen, „Klanken“ bleibt hinten, `updated` auf das Datum setzen.
 
 ## Fortschritt lesen
-`git fetch origin progress` und alle Dateien unter `progress/` in `origin/progress` lesen. Record-Typen: `talk` (Rollenspiel: turns mit you/better/notes/pron, weakWords, sounds), `pron` (Satz, score, weak = Wort:Punkte [schwache Laute]), `pron-basic`, `coach` (KI-Erklärung: verdict, words), `fail` (keine Bewertung: reason nomatch/noscore/…, gain).
+`git fetch origin progress` und alle Dateien unter `progress/` in `origin/progress` lesen. Record-Typen: `talk` (Rollenspiel: turns mit you/better/notes/pron, weakWords, sounds), `pron` (Satz, score, weak = Wort:Punkte [schwache Laute]), `pron-basic`, `coach` (KI-Erklärung: verdict, words), `fail` (keine Bewertung: reason nomatch/noscore/…, gain), `quiz` (Wiederholungstest: de, nl, heard, match %), `lesson` (komplette geführte Lektion: quiz, drill mit Punkten/schwachen Wörtern, grammar, summary).
+
+Die App hat den Tab **Lektion** (geführt: Test aus der vorherigen Lektion → neue Sätze vorlesen + nachsprechen → Gespräch → Auswertung). „Vorherige Lektion“ = nächstes Pack im Array, deshalb Reihenfolge neueste zuerst beibehalten.
 Daraus Wiederholung und Klanken-Übungen der nächsten Lektion ableiten.
