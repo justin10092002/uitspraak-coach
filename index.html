@@ -186,6 +186,7 @@ input[type=range]{accent-color:var(--accent);flex:1;min-width:0}
 
     <fieldset>
       <legend>Gesprächspartner (KI)</legend>
+      <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="handsfree"> Freihändig: nach jeder Antwort automatisch zuhören</label>
       <label class="small" style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="autoCoach"> KI-Coach erklärt jeden Aussprache-Satz automatisch (gesprochen)</label>
       <div class="row">
         <select id="provider" aria-label="KI-Anbieter">
@@ -409,30 +410,31 @@ const player=new Audio();player.setAttribute('playsinline','');
 const SILENT='data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQxAADB8AhSmxhIIEVCSiJrDCQBTcu3UrAIwUdkRgQbFAZC1CQEwTJ9mjRvBA4UOLD8nKVOWfh+UlK3z/177OXrfOdKl7pyn3Xf//WreyTRUoAWgBgkOAGbZHBgG1OF6zM82DWbZaUmMBptgQhGjsyYqc9ae9XFz280948NMBWInljyzsNRFLPWdnZGWrddDsjK1unuSrVN9jJsK8KuQtQCtMBjCEtImISdNKJOopIpBFpNSMbIHCSRpRR5iakjTiyzLhchUUBwCgyKiweBv/7UsQbg8isVNoMPMjAAAA0gAAABEVFGmgqK////9bP/6XCykxBTUUzLjEwMKqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq';
 let unlocked=false;
 function unlockAudio(){if(unlocked)return;try{player.src=SILENT;const p=player.play();if(p&&p.then)p.then(()=>{unlocked=true}).catch(()=>{});else unlocked=true}catch(e){}}
-function speakBrowser(text,rate){
-  if(!window.speechSynthesis) return;
+function speakBrowser(text,rate,onEnd){
+  if(!window.speechSynthesis){onEnd&&onEnd();return}
   speechSynthesis.cancel();
-  const u=new SpeechSynthesisUtterance(text);u.lang='nl-NL';u.rate=rate;
+  const u=new SpeechSynthesisUtterance(text);u.lang='nl-NL';u.rate=rate;if(onEnd)u.onend=onEnd;
   const v=speechSynthesis.getVoices().find(v=>/^nl/i.test(v.lang));if(v)u.voice=v;
   speechSynthesis.speak(u);
 }
 const ttsCache={};
-function playBytes(buf){const url=URL.createObjectURL(new Blob([buf],{type:'audio/mpeg'}));player.pause();player.src=url;player.currentTime=0;return player.play()}
-function speak(text,slow){
+function playBytes(buf,onEnd){const url=URL.createObjectURL(new Blob([buf],{type:'audio/mpeg'}));player.pause();player.onended=onEnd||null;player.src=url;player.currentTime=0;return player.play()}
+function speak(text,slow,onEnd){
   if(!text) return;
   unlockAudio();
   if(window.speechSynthesis) speechSynthesis.cancel();
-  const fallback=()=>speakBrowser(text,slow?0.6:0.95);
+  player.onended=null;
+  const fallback=()=>speakBrowser(text,slow?0.6:0.95,onEnd);
   if(!az()) return fallback();
   const ck=cfg.voice+'|'+(slow?1:0)+'|'+text;
-  if(ttsCache[ck]){playBytes(ttsCache[ck]).catch(fallback);return}
+  if(ttsCache[ck]){playBytes(ttsCache[ck],onEnd).catch(fallback);return}
   try{
     const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
     sc.speechSynthesisOutputFormat=SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
     const syn=new SpeechSDK.SpeechSynthesizer(sc,null);
     const ssml=`<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="nl-NL"><voice name="${cfg.voice}"><prosody rate="${slow?'-35%':'0%'}">${esc(text)}</prosody></voice></speak>`;
     syn.speakSsmlAsync(ssml,r=>{syn.close();
-      if(r.reason===SpeechSDK.ResultReason.SynthesizingAudioCompleted&&r.audioData&&r.audioData.byteLength){ttsCache[ck]=r.audioData;playBytes(r.audioData).catch(fallback)}else fallback();
+      if(r.reason===SpeechSDK.ResultReason.SynthesizingAudioCompleted&&r.audioData&&r.audioData.byteLength){ttsCache[ck]=r.audioData;playBytes(r.audioData,onEnd).catch(fallback)}else fallback();
     },()=>{syn.close();fallback()});
   }catch(e){fallback()}
 }
@@ -544,7 +546,7 @@ function recognizeAzure(reference,onListening,onUrl){
       sc.speechRecognitionLanguage='nl-NL';
       if(!store.get('plainTimeouts',false)){
         sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_InitialSilenceTimeoutMs,'8000');
-        sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,'2000');
+        sc.setProperty(SpeechSDK.PropertyId.SpeechServiceConnection_EndSilenceTimeoutMs,reference?'1800':'1200');
       }
       let ac;
       if(mic._release){ // our processed stream: push PCM ourselves
@@ -594,13 +596,14 @@ function recognizeBrowser(onListening){
 
 /* ================= AI ================= */
 const GEMINI_MODELS=['gemini-flash-latest','gemini-3.6-flash','gemini-3.5-flash-lite','gemini-2.5-flash'];
+const GEMINI_FAST=['gemini-flash-lite-latest','gemini-3.5-flash-lite','gemini-3.1-flash-lite','gemini-2.5-flash-lite'];
 function parseJSON(t){
   t=String(t||'').trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
   try{return JSON.parse(t)}catch(e){}
   const a=t.indexOf('{'),b=t.lastIndexOf('}');if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1))}catch(e){}}
   throw {msg:'Die KI-Antwort kam unvollständig an.',sub:'Versuch es nochmal.'};
 }
-async function llm(system,messages,maxTokens,audio){
+async function llm(system,messages,maxTokens,audio,fast){
   if(!ai()) throw {msg:'Kein KI-Schlüssel eingetragen.',sub:'Öffne oben die Einstellungen.'};
   if(cfg.provider==='claude'){
     const res=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'content-type':'application/json','x-api-key':cfg.aikey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
@@ -608,13 +611,14 @@ async function llm(system,messages,maxTokens,audio){
     if(!res.ok){const t=await res.text();throw {msg:res.status===401?'Der Claude-Schlüssel stimmt nicht.':res.status===429?'Zu viele Anfragen, kurz warten.':'Claude-Fehler '+res.status,sub:t.slice(0,200)}}
     const j=await res.json();return parseJSON((j.content||[]).map(c=>c.text||'').join(''));
   }
-  const list=cfg.model?[cfg.model]:[store.get('aiWorking','')].filter(Boolean).concat(GEMINI_MODELS);
+  const wk=fast?'aiWorkingFast':'aiWorking';
+  const list=cfg.model?[cfg.model]:[store.get(wk,'')].filter(Boolean).concat(fast?GEMINI_FAST:[],GEMINI_MODELS);
   let last=null;
   for(const m of [...new Set(list)]){
     const res=await fetch('https://generativelanguage.googleapis.com/v1beta/models/'+encodeURIComponent(m)+':generateContent?key='+encodeURIComponent(cfg.aikey),{method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({systemInstruction:{parts:[{text:system}]},contents:messages.map((x,i)=>({role:x.role==='assistant'?'model':'user',parts:(audio&&i===messages.length-1?[{inline_data:{mime_type:'audio/wav',data:audio}}]:[]).concat([{text:x.content}])})),generationConfig:{responseMimeType:'application/json',temperature:0.5,maxOutputTokens:maxTokens||800}})});
     if(res.ok){
-      const j=await res.json();store.set('aiWorking',m);
+      const j=await res.json();store.set(wk,m);
       const txt=(j.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');
       if(!txt) throw {msg:'Gemini hat nichts geantwortet.',sub:j.candidates?.[0]?.finishReason||''};
       return parseJSON(txt);
@@ -685,7 +689,7 @@ function renderScenes(){
     const b=document.createElement('button');b.dataset.id=p.id;b.setAttribute('aria-pressed',convo&&convo.pack.id===p.id?'true':'false');
     const s=document.createElement('b');s.textContent=(p.title.split('·')[0]||'').trim();
     b.append(s,p.scene.name||(p.title.split('·')[1]||p.title).trim());
-    b.onclick=()=>startScene(p.id);el.append(b);
+    b.onclick=()=>{startScene(p.id);unlockAudio();ensureCtx();speak(p.scene.open[0],false,autoListen)};el.append(b);
   });
 }
 function sysPrompt(p){
@@ -696,8 +700,8 @@ SCENE: ${sc.role}
 YOUR NAME: ${sc.who}
 GOAL FOR JUSTIN: ${sc.goal}
 TARGET PHRASES OF THIS LESSON (steer the talk so he gets to use some): ${(p.items||[]).slice(0,14).map(i=>i[0]).join(' | ')}
-Rules: stay in character; reply in natural, simple spoken Dutch (A2), informal je/jij; 1–2 short sentences; usually end with a question. Do NOT correct him during the talk and do not switch to German, even if he makes mistakes. If he is clearly stuck or writes German, help in very simple Dutch. After about ${MAXTURNS-2} of his messages, or once the goal is reached, wrap up with a natural goodbye and set done=true.
-Reply with ONLY JSON: {"reply":"Dutch line","reply_de":"German translation","hint":"German tip what he could say next, with a short Dutch example","done":false}`;
+HOW TO TALK: like a real Dutch person in their twenties chatting at a festival, not like a teacher. Casual spoken Dutch with natural particles and reactions (nou, hè, joh, echt?, haha, oké, ja toch, lekker, vet, gezellig, zeg), contractions and short sentences. React to what he actually said first (surprise, laugh, agree, a small story of your own), then sometimes ask something back; do not end every line with a question and never ask two questions at once. Max ~18 words. Keep vocabulary around A2 but sound native. Do NOT correct him, do not explain grammar, never switch to German. If he is stuck or says something German, help casually in easy Dutch ("Bedoel je …?"). After about ${MAXTURNS-2} of his messages or once the goal is reached, say a natural goodbye and set done=true.
+Reply with ONLY JSON: {"reply":"Dutch line","reply_de":"German translation","hint":"short German tip with a Dutch example","done":false}`;
 }
 function startScene(id){
   const p=allPacks().find(x=>x.id===id&&x.scene);if(!p)return;
@@ -734,13 +738,14 @@ async function talkTurn(entry){
   convo.msgs.push({role:'user',content:'Justin (spoken): '+entry.text});
   setTalk(convo.pack.scene.who+' denkt nach…','');
   try{
-    const r=await llm(sysPrompt(convo.pack),convo.msgs,500);
+    const r=await llm(sysPrompt(convo.pack),convo.msgs,260,null,true);
     entry.pending=false;
     const reply=String(r.reply||'').trim()||'Sorry, wat zei je?';
     convo.msgs.push({role:'assistant',content:reply});
     convo.log.push({who:'them',nl:reply,de:r.reply_de||''});
     convo.hint=r.hint||'';
-    renderLog();speak(reply);
+    const finished=r.done||convo.myTurns>=MAXTURNS;
+    renderLog();speak(reply,false,()=>{if(!finished)autoListen()});
     window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});
     if(r.done||convo.myTurns>=MAXTURNS){setTalk('Gespräch fertig!','Tippe auf „Feedback“, um deine Auswertung zu sehen.');$('endBtn').classList.add('primary')}
     else setTalk('Du bist dran.','');
@@ -762,6 +767,12 @@ $('talkRec').onclick=async()=>{
     await talkTurn({who:'me',text:r.text.trim(),words:r.words,scores:r.scores});
   }catch(e){btn.classList.remove('on');btn.disabled=false;setTalk(e.msg||'Fehler',e.sub||'');record({type:'fail',where:'gespraech',lesson:convo.pack.id,reason:e.code||e.msg||'',detail:String(e.sub||'').slice(0,160),gain:micGain})}
 };
+$('handsfree').checked=store.get('handsfree',true);
+$('handsfree').onchange=()=>store.set('handsfree',$('handsfree').checked);
+function autoListen(){
+  if(!$('handsfree').checked||!convo||convo.ended||talkBusy||!$('typeBox').hidden||$('pane-talk').hidden)return;
+  setTimeout(()=>{if(!talkBusy&&convo&&!convo.ended&&!$('talkRec').disabled)$('talkRec').click()},250);
+}
 $('typeBtn').onclick=()=>{$('typeBox').hidden=!$('typeBox').hidden;if(!$('typeBox').hidden)$('typeIn').focus()};
 $('typeSend').onclick=()=>{const v=$('typeIn').value.trim();if(!v||talkBusy||!convo||convo.ended)return;if(!ai()){setTalk('Kein KI-Schlüssel eingetragen.','Öffne oben die Einstellungen.');return}$('typeIn').value='';unlockAudio();talkTurn({who:'me',text:v,typed:true,words:[],scores:null})};
 $('typeIn').onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();$('typeSend').click()}};
@@ -877,13 +888,17 @@ function speakSegments(segs){
     const v=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith(x.lang==='nl'?'nl':'de'));if(v)u.voice=v;speechSynthesis.speak(u)})};
   if(!az()) return browser();
   const de=DE_VOICE[cfg.voice]||'de-DE-KatjaNeural';
+  const multi=cfg.voice==='nl-NL-MaartenNeural'?'de-DE-FlorianMultilingualNeural':'de-DE-SeraphinaMultilingualNeural';
+  const ssmlOne='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="de-DE"><voice name="'+multi+'">'+segs.map(x=>x.lang==='nl'
+    ?`<lang xml:lang="nl-NL"><prosody rate="-10%">${esc(x.text)}</prosody></lang>`:`<lang xml:lang="de-DE">${esc(x.text)}</lang>`).join(' ')+'</voice></speak>';
   const ssml='<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="de-DE">'+segs.map(x=>x.lang==='nl'
     ?`<voice name="${cfg.voice}"><prosody rate="-20%">${esc(x.text)}</prosody></voice>`:`<voice name="${de}">${esc(x.text)}</voice>`).join('')+'</speak>';
   try{
     const sc=SpeechSDK.SpeechConfig.fromSubscription(cfg.key,cfg.region);
     sc.speechSynthesisOutputFormat=SpeechSDK.SpeechSynthesisOutputFormat.Audio24Khz48KBitRateMonoMp3;
-    const syn=new SpeechSDK.SpeechSynthesizer(sc,null);
-    syn.speakSsmlAsync(ssml,r=>{syn.close();if(r.reason===SpeechSDK.ResultReason.SynthesizingAudioCompleted&&r.audioData&&r.audioData.byteLength)playBytes(r.audioData).catch(browser);else browser()},()=>{syn.close();browser()});
+    const run=(x,fail)=>{const syn=new SpeechSDK.SpeechSynthesizer(sc,null);
+      syn.speakSsmlAsync(x,r=>{syn.close();if(r.reason===SpeechSDK.ResultReason.SynthesizingAudioCompleted&&r.audioData&&r.audioData.byteLength)playBytes(r.audioData).catch(browser);else fail()},()=>{syn.close();fail()})};
+    run(ssmlOne,()=>run(ssml,browser));
   }catch(e){browser()}
 }
 async function waitWav(){for(let i=0;i<15&&!lastWav;i++)await new Promise(r=>setTimeout(r,100));return lastWav}
@@ -894,7 +909,7 @@ async function runCoach(box,info){
   const wav=cfg.provider==='gemini'?await waitWav():null;
   const sys=`You are a warm but honest Dutch pronunciation coach for Justin, a German native speaker (level A2) who wants to sound understandable at Dutch festivals.
 ${wav?'Listen carefully to the attached recording of Justin.':'There is no recording; rely only on the measurements below.'}
-Explain IN GERMAN, as if you were talking to him out loud, how he actually pronounced the sentence: what already sounded good, which words or sounds were off and exactly how they sounded (e.g. "das g in gezellig klang wie ein deutsches g statt wie das ch in 'ach'"), and how to fix it (mouth, lips, tongue, comparison with German sounds, stress). Be concrete and only claim what you can hear or what the measurements show. Max 90 spoken words. Address him with "du".
+Explain IN GERMAN, as if you were talking to him out loud, how he actually pronounced the sentence: what already sounded good, which words or sounds were off and exactly how they sounded (e.g. "das g in gezellig klang wie ein deutsches g statt wie das ch in 'ach'"), and how to fix it (mouth, lips, tongue, comparison with German sounds, stress). Be concrete and only claim what you can hear or what the measurements show. Max 60 spoken words, get to the point. Address him with "du".
 Return ONLY JSON:
 {"verdict":"one short German sentence","spoken":[{"lang":"de","text":"German part"},{"lang":"nl","text":"Dutch word or phrase"}],"words":[{"word":"Dutch word","problem":"German, short","tip":"German, short"}]}
 Use lang "nl" only for Dutch words/phrases you quote so they are read by a Dutch voice; everything else "de". words: max 4, only words that need work; [] if all good.`;
@@ -903,7 +918,7 @@ Speech recognition heard: "${info.heard||'-'}"
 `+(info.scores?`Azure scores (0-100): overall ${Math.round(info.scores.pron||0)}, accuracy ${Math.round(info.scores.acc||0)}, fluency ${Math.round(info.scores.flu||0)}, completeness ${Math.round(info.scores.comp||0)}
 Per word: ${info.words.map(w=>w.w+'='+(w.err==='Omission'?'missing':w.score)+(w.phs.some(p=>p.s<60)?' (weak sounds '+w.phs.filter(p=>p.s<60).map(p=>(p.p||'#')+':'+p.s).join(' ')+')':'')).join(', ')}`:`Words not recognized: ${(info.missed||[]).join(', ')||'none'}`);
   try{
-    const r=await llm(sys,[{role:'user',content:msg}],900,wav?bytesToB64(wav):null);
+    const r=await llm(sys,[{role:'user',content:msg}],700,wav?bytesToB64(wav):null,true);
     const segs=Array.isArray(r.spoken)?r.spoken.filter(x=>x&&x.text):[];
     say.innerHTML='';
     if(r.verdict){const v=document.createElement('div');v.className='verdict';v.textContent=r.verdict;say.append(v)}
