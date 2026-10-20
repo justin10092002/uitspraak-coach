@@ -1,0 +1,433 @@
+{
+ "device": "MacIntel",
+ "records": [
+  {
+   "type": "fail",
+   "where": "gespraech",
+   "lesson": "les6",
+   "reason": "nomatch",
+   "detail": "Nichts gehört. Sprich direkt nach dem Tippen los, halte das iPhone näher an den Mund oder stell in den Einstellungen die Mikrofon-Verstärkung höher.",
+   "gain": 2.5,
+   "id": "mvfxwtw4wyh9",
+   "at": "2026-10-20T00:23:34.228Z"
+  },
+  {
+   "type": "fail",
+   "where": "gespraech",
+   "lesson": "les6",
+   "reason": "nomatch",
+   "detail": "Nichts gehört. Sprich direkt nach dem Tippen los, halte das iPhone näher an den Mund oder stell in den Einstellungen die Mikrofon-Verstärkung höher.",
+   "gain": 2.5,
+   "id": "mvfxxj84nnry",
+   "at": "2026-10-20T00:24:07.060Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Is het ver hiervandaan?",
+   "score": 61,
+   "acc": 68,
+   "flu": 54,
+   "weak": [
+    "hiervandaan:fehlt"
+   ],
+   "id": "mvfxxy3112fu",
+   "at": "2026-10-20T00:24:26.317Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Is het ver hiervandaan?",
+   "heardAudio": true,
+   "verdict": "Justin, dein Rhythmus war gut, aber das Wort ver klang zu kurz.",
+   "words": [
+    "ver: Zu schnell, das e ist zu kurz."
+   ],
+   "id": "mvfxxzpdw0c9",
+   "at": "2026-10-20T00:24:28.417Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Is het ver hiervandaan?",
+   "score": 97,
+   "acc": 95,
+   "flu": 100,
+   "weak": [],
+   "id": "mvfxyqnktbd8",
+   "at": "2026-10-20T00:25:03.344Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Is het ver hiervandaan?",
+   "heardAudio": true,
+   "verdict": "Justin, das klingt schon super verständlich für ein Festival!",
+   "words": [
+    "hiervandaan: Zu betont"
+   ],
+   "id": "mvfxyskqj1h5",
+   "at": "2026-10-20T00:25:05.834Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Waar zijn de toiletten?",
+   "reason": "noscore",
+   "heard": "Waar zijn de toiletten?",
+   "gain": 2.5,
+   "id": "mvfxze4xg6xf",
+   "at": "2026-10-20T00:25:33.777Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Waar zijn de toiletten?",
+   "score": 100,
+   "missed": [],
+   "heard": "Waar zijn de toiletten?",
+   "id": "mvfxze50lfs4",
+   "at": "2026-10-20T00:25:33.780Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Waar zijn de toiletten?",
+   "heardAudio": true,
+   "verdict": "Super verständlich, Justin, das Festival kann kommen!",
+   "words": [],
+   "id": "mvfxzj6bu8vi",
+   "at": "2026-10-20T00:25:40.307Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Rechtdoor, en dan links.",
+   "reason": "noscore",
+   "heard": "Rechtdoor en dan links?",
+   "gain": 2.5,
+   "id": "mvfy00a0yl0o",
+   "at": "2026-10-20T00:26:02.472Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Rechtdoor, en dan links.",
+   "score": 100,
+   "missed": [],
+   "heard": "Rechtdoor en dan links?",
+   "id": "mvfy00a3rclg",
+   "at": "2026-10-20T00:26:02.475Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Rechtdoor, en dan links.",
+   "heardAudio": true,
+   "verdict": "Justin, du wirst auf dem Festival auf jeden Fall verstanden!",
+   "words": [],
+   "id": "mvfy01sm3w3z",
+   "at": "2026-10-20T00:26:04.438Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "reason": "noscore",
+   "heard": "Bij het tweede podium rechtsaf.",
+   "gain": 2.5,
+   "id": "mvfy0lzgycro",
+   "at": "2026-10-20T00:26:30.604Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "score": 100,
+   "missed": [],
+   "heard": "Bij het tweede podium rechtsaf.",
+   "id": "mvfy0lzjspzi",
+   "at": "2026-10-20T00:26:30.607Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "heardAudio": true,
+   "verdict": "Super verständlich, Justin!",
+   "words": [
+    "tweede: Wie deutsches ie"
+   ],
+   "id": "mvfy0ngjgna9",
+   "at": "2026-10-20T00:26:32.515Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "reason": "noscore",
+   "heard": "Bij het tweede podium rechtsaf.",
+   "gain": 2.5,
+   "id": "mvfy1iq4t8y2",
+   "at": "2026-10-20T00:27:13.036Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "score": 100,
+   "missed": [],
+   "heard": "Bij het tweede podium rechtsaf.",
+   "id": "mvfy1iq5vf7f",
+   "at": "2026-10-20T00:27:13.037Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Bij het tweede podium rechtsaf.",
+   "heardAudio": true,
+   "verdict": "Das klingt schon verständlich, Justin, aber die Laute müssen noch etwas weicher werden.",
+   "words": [
+    "tweede: zu deutsches e",
+    "rechtsaf: f zu weich"
+   ],
+   "id": "mvfy1kf4qn0m",
+   "at": "2026-10-20T00:27:15.232Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "reason": "noscore",
+   "heard": "Zullen we om 11 uur afspreken?",
+   "gain": 2.5,
+   "id": "mvfy2lk6psbr",
+   "at": "2026-10-20T00:28:03.366Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "score": 83,
+   "missed": [
+    "elf"
+   ],
+   "heard": "Zullen we om 11 uur afspreken?",
+   "id": "mvfy2lk9seix",
+   "at": "2026-10-20T00:28:03.369Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "heardAudio": true,
+   "verdict": "Das klang schon sehr gut, Justin!",
+   "words": [
+    "elf: wie deutsches Ä"
+   ],
+   "id": "mvfy2ncf24us",
+   "at": "2026-10-20T00:28:05.679Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "reason": "noscore",
+   "heard": "Zullen we om 11 uur afspreken?",
+   "gain": 2.5,
+   "id": "mvfy33su7xcu",
+   "at": "2026-10-20T00:28:27.006Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "score": 83,
+   "missed": [
+    "elf"
+   ],
+   "heard": "Zullen we om 11 uur afspreken?",
+   "id": "mvfy33svelwi",
+   "at": "2026-10-20T00:28:27.007Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "heardAudio": true,
+   "verdict": "Das war schon gut verständlich, Justin!",
+   "words": [
+    "elf: Zu deutsches e"
+   ],
+   "id": "mvfy35h0mqu2",
+   "at": "2026-10-20T00:28:29.172Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "reason": "nomatch",
+   "detail": "Nichts gehört. Sprich direkt nach dem Tippen los, halte das iPhone näher an den Mund oder stell in den Einstellungen die Mikrofon-Verstärkung höher.",
+   "gain": 2.5,
+   "id": "mvfy3mpjt9ow",
+   "at": "2026-10-20T00:28:51.511Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "reason": "noscore",
+   "heard": "Zullen we om 11 uur afspreken?",
+   "gain": 2.5,
+   "id": "mvfy40fyxa28",
+   "at": "2026-10-20T00:29:09.310Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "score": 83,
+   "missed": [
+    "elf"
+   ],
+   "heard": "Zullen we om 11 uur afspreken?",
+   "id": "mvfy40fym58t",
+   "at": "2026-10-20T00:29:09.310Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "heardAudio": true,
+   "verdict": "Justin, verständlich, aber die Zahl klingt deutsch.",
+   "words": [
+    "elf: Zu deutsches e"
+   ],
+   "id": "mvfy4276glmd",
+   "at": "2026-10-20T00:29:11.586Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Zullen we om elf uur afspreken?",
+   "reason": "nomatch",
+   "detail": "Nichts gehört. Sprich direkt nach dem Tippen los, halte das iPhone näher an den Mund oder stell in den Einstellungen die Mikrofon-Verstärkung höher.",
+   "gain": 2.5,
+   "id": "mvfy4ki17ox3",
+   "at": "2026-10-20T00:29:35.305Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Ik ben er over vijf minuten.",
+   "score": 98,
+   "acc": 97,
+   "flu": 100,
+   "weak": [],
+   "id": "mvfy51xduljv",
+   "at": "2026-10-20T00:29:57.889Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Ik ben er over vijf minuten.",
+   "heardAudio": true,
+   "verdict": "Das klang schon sehr gut, Justin!",
+   "words": [
+    "vijf: deutsches f"
+   ],
+   "id": "mvfy5387f67y",
+   "at": "2026-10-20T00:29:59.575Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "reason": "nomatch",
+   "detail": "Nichts gehört. Sprich direkt nach dem Tippen los, halte das iPhone näher an den Mund oder stell in den Einstellungen die Mikrofon-Verstärkung höher.",
+   "gain": 2.5,
+   "id": "mvfy7gjg2jif",
+   "at": "2026-10-20T00:31:50.140Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "reason": "noscore",
+   "heard": "Mijn telefoon is bijna leeg.",
+   "gain": 2.5,
+   "id": "mvfy7u6fid7j",
+   "at": "2026-10-20T00:32:07.815Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "score": 100,
+   "missed": [],
+   "heard": "Mijn telefoon is bijna leeg.",
+   "id": "mvfy7u6izqmn",
+   "at": "2026-10-20T00:32:07.818Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "heardAudio": true,
+   "verdict": "Das war schon sehr verständlich, Justin, aber beim g müssen wir noch feilen!",
+   "words": [
+    "leeg: Deutsches g am Ende"
+   ],
+   "id": "mvfy7vpl1xe2",
+   "at": "2026-10-20T00:32:09.801Z"
+  },
+  {
+   "type": "fail",
+   "where": "aussprache",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "reason": "noscore",
+   "heard": "Mijn telefoon is bijna leeg.",
+   "gain": 2.5,
+   "id": "mvfy8epktr65",
+   "at": "2026-10-20T00:32:34.424Z"
+  },
+  {
+   "type": "pron-basic",
+   "lesson": "les6",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "score": 100,
+   "missed": [],
+   "heard": "Mijn telefoon is bijna leeg.",
+   "id": "mvfy8eplk0q6",
+   "at": "2026-10-20T00:32:34.425Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "heardAudio": true,
+   "verdict": "Das klang schon sehr gut, Justin!",
+   "words": [
+    "telefoon: Betonung auf erster Silbe"
+   ],
+   "id": "mvfy8gqjhfv3",
+   "at": "2026-10-20T00:32:37.051Z"
+  },
+  {
+   "type": "pron",
+   "lesson": "les6",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "score": 0,
+   "acc": 0,
+   "flu": 0,
+   "weak": [
+    "Mijn:fehlt",
+    "telefoon:fehlt",
+    "is:fehlt",
+    "bijna:fehlt",
+    "leeg:fehlt"
+   ],
+   "id": "mvfy9cabz4fx",
+   "at": "2026-10-20T00:33:17.939Z"
+  },
+  {
+   "type": "coach",
+   "sentence": "Mijn telefoon is bijna leeg.",
+   "heardAudio": true,
+   "verdict": "Du hast gar nichts gesagt, Justin!",
+   "words": [
+    "Mijn telefoon is bijna leeg.: Nicht gesprochen"
+   ],
+   "id": "mvfy9dzzscgc",
+   "at": "2026-10-20T00:33:20.159Z"
+  }
+ ]
+}
