@@ -1,6 +1,101 @@
 {
- "updated": "2026-10-19",
+ "updated": "2026-11-12",
  "packs": [
+  {
+   "id": "les7",
+   "title": "Les 7 · Onderweg: trein & inchecken (12.11.)",
+   "items": [
+    [
+     "Mag ik een retourtje naar Rotterdam?",
+     "Kann ich ein Rückfahrticket nach Rotterdam haben?",
+     "naar: langes aa · retourtje: tj = „tsch“",
+     "MAG  re·TOUR·tje  ROT·ter·dam"
+    ],
+    [
+     "Van welk perron vertrekt de trein?",
+     "Von welchem Gleis fährt der Zug ab?",
+     "vertrekken = abfahren (nicht verstecken!)",
+     "WELK  per·RON  ver·TREKT"
+    ],
+    [
+     "Moet ik in Utrecht overstappen?",
+     "Muss ich in Utrecht umsteigen?",
+     "Modalverb → trennbares Verb bleibt zusammen am Ende",
+     "MOET  U·trecht  O·ver·stap·pen"
+    ],
+    [
+     "Ik stap in Utrecht over.",
+     "Ich steige in Utrecht um.",
+     "ohne Modalverb: over rutscht ans Ende",
+     "STAP  U·trecht  O·ver"
+    ],
+    [
+     "De trein heeft tien minuten vertraging.",
+     "Der Zug hat zehn Minuten Verspätung.",
+     "heeft mit ee · vertraging: beide g rau im Rachen",
+     "TREIN  HEEFT  ver·TRA·ging"
+    ],
+    [
+     "Hoe laat vertrekt de trein dan?",
+     "Wann fährt der Zug dann ab?",
+     "lieber mit Verb als „de vertrek“ (es heißt het vertrek)",
+     "HOE  LAAT  ver·TREKT"
+    ],
+    [
+     "Vergeet niet uit te checken!",
+     "Vergiss nicht auszuchecken!",
+     "ui = offenes „öi“ · uit te checken: te steht zwischen den Teilen",
+     "ver·GEET  NIET  UIT  te  CHEC·ken"
+    ],
+    [
+     "Ik heb gereserveerd op naam van Justin.",
+     "Ich habe auf den Namen Justin reserviert.",
+     "Partizip mit ge- und -d (reserveer endet nicht auf 't kofschip)",
+     "ge·re·ser·VEERD  NAAM"
+    ],
+    [
+     "Kan ik nu inchecken?",
+     "Kann ich jetzt einchecken?",
+     "in·checken: Betonung auf in",
+     "KAN  NU  IN·chec·ken"
+    ],
+    [
+     "Waar is de sleutel?",
+     "Wo ist der Schlüssel?",
+     "eu = langes „ö“",
+     "WAAR  SLEU·tel"
+    ],
+    [
+     "Heb je een tip voor vanavond?",
+     "Hast du einen Tipp für heute Abend?",
+     "een lang, en kurz · Heb je – ohne -t",
+     "TIP  van·A·vond"
+    ],
+    [
+     "Ik ga naar Rotterdam voor een hardcore rave.",
+     "Ich fahre für einen Hardcore-Rave nach Rotterdam.",
+     "naar = Richtung, na = zeitlich · een = ein",
+     "NAAR  ROT·ter·dam  HARD·core"
+    ],
+    [
+     "Waar zijn de toiletten?",
+     "Wo sind die Toiletten?",
+     "Wiederholung (66 Punkte am 19.10.) · oi wie „Boiler“",
+     "toi·LET·ten"
+    ]
+   ],
+   "scene": {
+    "name": "Hostel inchecken",
+    "who": "Lotte",
+    "role": "You are Lotte, receptionist at a youth hostel in Rotterdam. Justin arrives in the evening by train for a hardcore rave. He has a reservation. Check him in (name, nights, payment), give him the key and room number, explain breakfast time. If he asks, give a tip for food or going out nearby and explain how to get there by tram (in- and uitchecken).",
+    "goal": "Check ein (Reservierung auf deinen Namen), frag nach dem Schlüssel und hol dir einen Tipp für heute Abend.",
+    "open": [
+     "Goedenavond, welkom! Heb je gereserveerd?",
+     "Guten Abend, willkommen! Hast du reserviert?"
+    ],
+    "hint": "„Ik heb gereserveerd op naam van …“ · „Heb je een tip voor …?“ · naar (Richtung) vs. na (zeitlich)."
+   }
+  },
   {
    "id": "les6",
    "title": "Les 6 · Afspreken & de weg vragen (12.10.)",
